@@ -13,7 +13,7 @@ M = spawn pad
 N = mill
 Z = 3-mill
 
-## beta - 1.0:
+## 2.0 and more recent versions:
 F = traps
 V = spikes
 Y = age 7 building
@@ -37,6 +37,7 @@ Z = 3-mill
 https://discord.com/invite/5FrkNqkvPz
 # CREDITS:
 - tntubruh777 (TnT_Userbruh)
+- l_gen_ (LEGEND)
 - lanuore
 - overtoxicity (omen sang)
 - wasd66255
