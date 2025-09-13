@@ -1,4 +1,4 @@
-# TnT-CLIENT-ALL-VERSIONS-
+# TπT CLIENT All Versions
 A fking op mod used to destroy ppl, now in chronical order
 
 <img width="880" height="207" alt="image" src="https://github.com/user-attachments/assets/2fea4928-c404-4c19-9e5f-47a1a3e6d5c6" />
