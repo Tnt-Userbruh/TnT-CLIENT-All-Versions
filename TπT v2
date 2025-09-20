@@ -96,7 +96,7 @@ SPAM!!!!!SPAM!!!!!SPAM!!!!!
 */
 
 // ANTI ALTCHA
-class A {
+class Altchad {
     constructor() {
         this.core_count = Math.min(16, navigator.hardwareConcurrency || 8);
         this.workers = [];
@@ -216,22 +216,22 @@ class A {
     async generate() {
         const challengeData = await this.getChallenge();
         const solution = await this.solveChallenge(challengeData);
-        this.code = `alt:${A.createPayload(challengeData, solution)}`;
+        this.code = `alt:${Altchad.createPayload(challengeData, solution)}`;
         return this.code;
     }
 }
 
-let aj = new A();
-let tk = null;
+let altchas = new Altchad();
+let tokens = null;
 
-async function gTk() {
-    tk = await aj.generate();
+async function getfuckingtoken() {
+    tokens = await altchas.generate();
 }
-async function sTa() {
-    await gTk();
-    (tk);
+async function enterGamebutton() {
+    await getfuckingtoken();
+    (tokens);
 }
-sTa();
+enterGamebutton();
 
 // name:         MooMoo.io Script Unpatcher (Any Hack) (All patches, fixes packets)
 /* How to use
@@ -303,9 +303,9 @@ if (window.captchaCallbackComplete) {
 
 let cha = document.getElementById('altcha');
 cha.style.display = "none";
-let sb = document.getElementById('altcha_checkbox');
-let mj = document.getElementById("enterGame");
-mj.innerHTML = "⇏ ‍  ‍  ‍Enter Game ‍ ‍   ‍⇍";
+let altchek = document.getElementById('altcha_checkbox');
+let enterGame = document.getElementById("enterGame");
+enterGame.innerHTML = "⇏ ‍  ‍  ‍Enter Game ‍ ‍   ‍⇍";
 document.getElementById("enterGame").addEventListener("mouseenter", function() {
     document.getElementById('enterGame').innerText = "⇏ ‍Enter Game ‍⇍";
 });
@@ -317,8 +317,8 @@ function sd(e) {
     var t;
     if (((t = e == null ? undefined : e.detail) == null ? undefined : t.state) === "verified") {
         Ei = e.detail.payload;
-        if (mj && mj instanceof HTMLElement) {
-            mj.classList.remove("disabled");
+        if (enterGame && enterGame instanceof HTMLElement) {
+            enterGame.classList.remove("disabled");
         } else {
             console.error("NO FUCKING WAY YOU JUST DELETED THE let enterGame");
         }
@@ -326,192 +326,47 @@ function sd(e) {
 }
 
 window.addEventListener("load", () => {
-    sb.click();
+    altchek.click();
     const e = document.getElementById("altcha");
     if (!(e == null)) {
         e.addEventListener("statechange", sd);
     }
 });
 
-// test goldbot for future 2.0 vers...
-let bots = [];
-let ownPlayer = {
-    sid: null,
-    x: 0,
-    y: 0,
-    dir: 0,
-    skinIndex: 0,
-    name: null
-};
-
-let chatMessages = [
-  "this is a bot",
-  "tntubruh is making it",
-  "testing bot no kill"
-];
-
-async function safeDecode(event) {
-    try {
-        let buf;
-        if (event.data instanceof Blob) {
-            buf = new Uint8Array(await event.data.arrayBuffer());
-        } else if (event.data instanceof ArrayBuffer) {
-            buf = new Uint8Array(event.data);
-        } else return null;
-        return msgpackLite.decode(buf);
-    } catch {
-        return null;
-    }
-}
-
-function hookPacket(decoded) {
-    if (!decoded) return null;
-    return decoded.length > 1 && Array.isArray(decoded[1]) ?
-        [decoded[0], ...decoded[1]] :
-        decoded;
-}
-
-class WebSocketProxy extends NativeWebSocket {
-    constructor(...args) {
-        super(...args);
-
-        if (!mainSocket) {
-            mainSocket = this;
-
-            this.addEventListener("message", async e => {
-                let hooked = hookPacket(await safeDecode(e));
-                if (!hooked) return;
-
-                if (hooked[0] === "io-init") {
-                    let region = mainSocket.url.split("/")[2];
-                    const BOT_COUNT = 3;
-                    for (let i = 0; i < BOT_COUNT; i++) {
-                        bots.push(new BotClient(region, tk));
-                    }
-                }
-                if (hooked[0] === "C" && ownPlayer.sid == null) {
-                    ownPlayer.sid = hooked[1];
-                }
-                if (hooked[0] === "D" && hooked[1][1] === ownPlayer.sid) {
-                    ownPlayer.name = hooked[1][2];
-                }
-                if (hooked[0] === "a") {
-                    for (let i = 0; i < hooked[1].length / 13; i++) {
-                        let p = hooked[1].slice(13 * i, 13 * i + 13);
-                        if (p[0] == ownPlayer.sid) {
-                            [ownPlayer.x, ownPlayer.y, ownPlayer.dir, ownPlayer.skinIndex] = [p[1], p[2], p[3], p[9]];
-                        }
-                    }
-                    for (let b of bots) {
-                        b.autm.x = ownPlayer.x;
-                        b.autm.y = ownPlayer.y;
-                    }
-                }
-            });
-        }
-    }
-}
-window.WebSocket = WebSocketProxy;
-
-class BotClient {
-    constructor(region, tk) {
-        this.socket = new NativeWebSocket(`wss://${region}/?tk=${tk}`);
-        this.sid = null;
-        this.x = 0;
-        this.y = 0;
-        this.dir = 0;
-        this.weaponIndex = 0;
-        this.health = 100;
-        this.foodCount = 100;
-        this.packetCount = 0;
-        this.autm = {
-            x: 0,
-            y: 0,
-            boolean: true
-        };
-        this.chatIndex = 0;
-        setInterval(() => (this.packetCount = 0), 1000);
-
-        this.socket.addEventListener("open", () => {
-            this.socket.addEventListener("message", async e => {
-                let hooked = hookPacket(await safeDecode(e));
-                if (!hooked) return;
-
-                if (hooked[0] === "io-init") this.spawn();
-                if (hooked[0] === "C" && this.sid == null) this.sid = hooked[1];
-                if (hooked[0] === "D" && hooked[1][1] === this.sid) {
-                    this.foodCount = 100;
-                    this.health = 100;
-                }
-                if (hooked[0] === "a") {
-                    for (let i = 0; i < hooked[1].length / 13; i++) {
-                        let p = hooked[1].slice(13 * i, 13 * i + 13);
-                        if (p[0] == this.sid) {
-                            [this.x, this.y, this.dir, this.weaponIndex] = [p[1], p[2], p[3], p[5]];
-                        }
-                    }
-                    if (this.autm.boolean) {
-                        let dx = this.autm.x - this.x,
-                            dy = this.autm.y - this.y;
-                        let dist = Math.hypot(dx, dy),
-                            ang = Math.atan2(dy, dx);
-                        this.sendMessage("9", dist >= 105 ? ang : ownPlayer.dir);
-                    }
-                }
-                if (hooked[0] === "P") this.spawn();
-            });
-        });
-    }
-    spawn() {
-        let randomSkin = Math.floor(Math.random() * 15);
-        this.sendMessage("M", {
-            name: "Test 1 gold bot",
-            moofoll: true,
-            skin: randomSkin
-        });
-    }
-    sendMessage(type, ...args) {
-        if (this.packetCount < 120) {
-            this.socket.send(new Uint8Array(msgpackLite.encode([type, args])));
-            this.packetCount++;
-        }
-    }
-};
-
 let placeSpTick = false;
 let tdf = false;
 let enemies = false;
-let testMode = window.location.hostname == "127.0.0.1";
+let hideUI = false;
+let updateScheduled = false;
 let cantWearTankGear = false;
 let cantWearBullHat = false;
 let doSpikeRedThingmajic = false;
+
 let lastAutoPlaceTime = 0;
 let autoPlaceInterval = 150; // in ms — adjust as needed
-let updateScheduled = false;
+
+let player;
+let playerSID;
+let tmpObj;
+
 let allChats = [];
+let ais = [];
+let players = [];
+let gameObjects = [];
+let firsto = [];
+let liztobj = [];
+let projectiles = [];
+let deadPlayers = [];
+let breakObjects = [];
+let enemy = [];
+let nears = [];
+let near = [];
 let ticks = {
     tick: 0,
     delay: 0,
     time: [],
     manage: [],
 };
-let ais = [];
-let players = [];
-let gameObjects = [];
-let liztobj = [];
-let projectiles = [];
-let deadPlayers = [];
-
-let breakObjects = [];
-
-let player;
-let playerSID;
-let tmpObj;
-
-let enemy = [];
-let nears = [];
-let near = [];
-
 let my = {
     reloaded: false,
     waitHit: 0,
@@ -533,63 +388,45 @@ let my = {
     pushData: {}
 }
 
-
 function getEl(id) {
     return document.getElementById(id);
 }
-
-function sr(elementId) {
+function removeEl(elementId) {
     const element = getEl(elementId);
     if (element) element.remove();
 }
-sr("#pre-content-container");
-sr("joinPartyButton");
-sr("woodDisplay");
-sr("foodDisplay");
-sr("stoneDisplay");
-sr("partyButton");
-sr("settingsButton");
-sr("leaderboardButton");
-sr("adCard");
-sr("chatButton");
-sr("mobileDownloadButtonContainer");
-sr("animation_container");
-sr("smallLinks");
-sr("wideAdCard");
-
-document.getElementById('linksContainer2').innerHTML = 'TπT CLIENT is enabled,You are good to hack!' ;
-document.title = "TπT's MOOMOO.io";
-
-(function() {
-    let w = document.createElement("link");
-    w.rel = "stylesheet";
-    w.href = "https://fonts.googleapis.com/css?family=Ubuntu:700";
-    w.type = "text/css";
-    document.head.appendChild(w);
-})();
+removeEl("#pre-content-container");
+removeEl("joinPartyButton");
+removeEl("woodDisplay");
+removeEl("foodDisplay");
+removeEl("stoneDisplay");
+removeEl("partyButton");
+removeEl("settingsButton");
+removeEl("leaderboardButton");
+removeEl("adCard");
+removeEl("chatButton");
+removeEl("mobileDownloadButtonContainer");
+removeEl("animation_container");
+removeEl("smallLinks");
+removeEl("wideAdCard");
+removeEl("linksContainer2");
+document.title = "MOOMOO.io";
 
 (function() {
-    let x = document.createElement("link");
-    x.rel = "stylesheet";
-    x.href = "https://fonts.googleapis.com/css?family=Inter:500";
-    x.type = "text/css";
-    document.head.appendChild(x);
-})();
+    const font = [
+        "https://fonts.googleapis.com/css?family=Ubuntu:700",
+        "https://fonts.googleapis.com/css?family=Inter:500",
+        "https://fonts.googleapis.com/css?family=Google+Sans:500",
+        "https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap"
+    ];
 
-(function() {
-    let y = document.createElement("link");
-    y.rel = "stylesheet";
-    y.href = "https://fonts.googleapis.com/css?family=Google+Sans:500";
-    y.type = "text/css";
-    document.head.appendChild(y);
-})();
-
-(function() {
-    let z = document.createElement("link");
-    z.rel = "stylesheet";
-    z.href = "https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap";
-    z.type = "text/css";
-    document.head.appendChild(z);
+    font.forEach(function(href) {
+        let link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        link.type = "text/css";
+        document.head.appendChild(link);
+    });
 })();
 
 // 2 configs for utils to work
@@ -609,12 +446,13 @@ cfg.deathFadeout = 0;
 cfg.playerCapacity = 9999;
 
 // CHECK IN SANDBOX:
+let testMode = window.location.hostname == "127.0.0.1";
 cfg.isSandbox = window.location.hostname == "sandbox.moomoo.io";
 
 // CUSTOMIZATION:
-cfg.skinColors = ["#bf8f54", "#cbb091", "#896c4b",
-                     "#fadadc", "#ececec", "#c37373", "#4c4c4c", "#ecaff7", "#738cc3",
-                     "#8bc373", "#91b2db"];
+cfg.skinColors = ["#bf8f54", "#cbb091", "#896c4b", "#fadadc", "#ececec", "#c37373", "#4c4c4c", "#ecaff7", "#738cc3", "#8bc373", "#91b2db"];
+
+// WEAPONS:
 cfg.weaponVariants = [{
     id: 0,
     src: "",
@@ -649,6 +487,8 @@ cfg.weaponVariants = [{
 cfg.anotherVisual = true;
 cfg.useWebGl = false;
 cfg.resetRender = true;
+// WHY OP PING :sob:
+window.ping = 0;
 
 // STORAGE:
 let canStore;
@@ -678,28 +518,13 @@ function getSavedVal(name) {
 
 let res = getSavedVal("moofoll");
 function holySHIT() {
-  if (!res) {
-    res = true;
-    saveVal("moofoll", 1);
-  }
+    if (!res) {
+        res = true;
+        saveVal("moofoll", 1);
+    }
 }
 
-// CONFIGS:
-let gC = function(a, b) {
-    try {
-        let res = JSON.parse(getSavedVal(a));
-        if (typeof res === "object") {
-            return b;
-        } else {
-            return res;
-        }
-    } catch (e) {
-        alert("why skid you motherfucker :sob:");
-        return b;
-    }
-};
-
-let cs = {
+let settingFunctions = {
     autoBuy: true,
     autoBuyEquip: true,
     autoPush: true,
@@ -729,15 +554,31 @@ let cs = {
     autoBreakSpike: true,
     safeFalk: true,
 };
+let cs = settingFunctions;
 
-window.removeConfigs = function() {
-    for (let cF in cs) {
-        deleteVal(cF, cs[cF]);
+// CONFIGS:
+let gC = function(a, b) {
+    try {
+        let res = JSON.parse(getSavedVal(a));
+        if (typeof res === "object") {
+            return b;
+        } else {
+            return res;
+        }
+    } catch (e) {
+        alert("why skid you motherfucker :sob:");
+        return b;
     }
 };
 
-for (let cF in cs) {
-    cs[cF] = gC(cF, cs[cF]);
+window.removeConfigs = function() {
+    for (let cF in settingFunctions) {
+        deleteVal(cF, settingFunctions[cF]);
+    }
+};
+
+for (let cF in settingFunctions) {
+    settingFunctions[cF] = gC(cF, settingFunctions[cF]);
 }
 
 // FUNCTIONS:
@@ -748,7 +589,6 @@ window.leave = function () {
         "dev are too weak": true,
     });
 };
-
 window.debug = function() {
     my.waitHit = 0;
     my.autoAim = false;
@@ -763,27 +603,11 @@ window.wasdMode = function() {
     toggleUseless(useWasd);
 };
 window.startGrind = function() {
-    if (cs.weaponGrinder) {
+    if (settingFunctions.weaponGrinder) {
         for (let i = 0; i < Math.PI * 2; i += Math.PI / 2) {
             checkPlace(player.getItemType(22), i);
         }
     }
-};
-window.resBuild = function() {
-    if (gameObjects.length) {
-        gameObjects.forEach((tmp) => {
-            tmp.breakObj = false;
-        });
-        breakObjects = [];
-    }
-};
-window.toggleVisual = function() {
-    cfg.anotherVisual = !cfg.anotherVisual;
-    gameObjects.forEach((tmp) => {
-        if (tmp.active) {
-            tmp.dir = tmp.lastDir;
-        }
-    });
 };
 window.leave = function () {
     origPacket("kys", {
@@ -792,21 +616,17 @@ window.leave = function () {
         "dev are too weak": true,
     });
 };
-// WHY OP PING :sob:
-window.ping = 0;
 
-
-let firsto = [];
-let sM = false;
-
-
+const PACKET_LIMIT = 1000;
+let socket;
+let packetCounter = 0;
+let lastFlushTime = Date.now();
 let socketID;
-//...lol
 let io = {
     send: packet
 };
 
-function Mgs(message) {
+function packetsMsg(message) {
     let data = new Uint8Array(message.data);
     let parsed = window.msgpack.decode(data);
     let type = parsed[0];
@@ -863,7 +683,7 @@ WebSocket.prototype.send = function (message) {
     if (!WS) {
         WS = this;
         WS.addEventListener("message", function (msg) {
-            Mgs(msg);
+            packetsMsg(msg);
         });
         WS.addEventListener("close", (event) => {
             if (event.code == 4001) {
@@ -989,11 +809,6 @@ WebSocket.prototype.send = function (message) {
         this.nsend(message);
     }
 };
-const PACKET_LIMIT = 1000;
-let socket;
-
-let packetCounter = 0;
-let lastFlushTime = Date.now();
 
 function sendPacket(packet) {
     packetCounter++;
@@ -1011,56 +826,42 @@ function sendPacket(packet) {
 }
 
 // info panel
-let iP = document.createElement("div");
-iP.id = "statusGui";
-document.body.append(iP);
-iP.style = `
-                padding: 10px;
-                background-color: rgb(208 128 0 / 41%);
-                border-radius: 15px;
-                position: absolute;
-                width: 110px;
-                height: auto;
+let infoPanel= document.createElement("div");
+infoPanel.id = "infoPanel";
+document.body.append(infoPanel);
+infoPanel.style = `padding: 10px; background-color: rgb(208 128 0 / 41%); border-radius: 15px; position: absolute; width: 110px; height: auto; left: 20px; bottom: 211px; pointer-events: none; font-family: "Ubuntu"; font-size: 13px; text-align: center; color: #fff; text-shadow: 0 0 4px white; backdrop-filter: blur(10px); `;
+getEl("gameUI").appendChild(infoPanel);
+function createGUI() {
+    infoPanel.innerHTML = `
+
+    PriXP: <span id="priXP">0</span><br>
+    SecXP: <span id="secXP">0</span><br>
+    F/S: <span id="gameFrames">60</span><br>
+    Ping: <span id="gamePing">200</span><br>
+    P/S: <span id="gamePackets">0</span><br>
+    InstaC: <span id="instaKilling">OFF</span><br>
+    3-Mill: <span id="gameAutoMills">OFF</span><br>
+
+    <style>
+        @media only screen and (max-width: 896px) {
+            #mapDisplay {
+                width: 130px;
+                height: 130px;
+                bottom: 20px;
                 left: 20px;
-                bottom: 211px;
-                pointer-events: none;
-                font-family: "Ubuntu";
-                font-size: 13px;
-                text-align: center;
-                color: #fff;
-                text-shadow: 0 0 4px white;
-                backdrop-filter: blur(10px);
-            `;
-getEl("gameUI").appendChild(iP);
-function gui() {
-    iP.innerHTML = `
-                <style>
-                    @media only screen and (max-width: 896px) {
-                        #mapDisplay {
-                            width: 130px;
-                            height: 130px;
-                            bottom: 20px;
-                            left: 20px;
-                            top: auto;
-                        }
-                    }
-                    #statusGui span {
-                        margin-left: 5px;
-                        font-family: Ubuntu;
-                    }
-                </style>
+                top: auto;
+            }
+        }
 
-                PriXP: <span id="priXP">0</span><br>
-                SecXP: <span id="secXP">0</span><br>
-                F/S: <span id="gameFrames">60</span><br>
-                Ping: <span id="gamePing">200</span><br>
-                P/S: <span id="gamePackets">0</span><br>
-                InstaC: <span id="instaKilling">OFF</span><br>
-                3-Mill: <span id="gameAutoMills">OFF</span><br>
-                `
+        #infoPanel span {
+            margin-left: 5px;
+            font-family: Ubuntu;
+        }
+    </style>
+
+    `
 }
-gui();
-
+createGUI();
 
 // mod menu html & css
 let backgroundEffect = document.createElement("div");
@@ -1120,7 +921,7 @@ const HTML = {
     },
     justInfos: function(id, name, info, forSmart = false) {
         return `
-          <div class="framev2 ${(cs[id]) ? "active" : ""}"; id=${id}>
+          <div class="framev2 ${(settingFunctions[id]) ? "active" : ""}"; id=${id}>
             <label style="font-size: 18px;">${name}</label><br>
             <div style="font-size: 15px; color: #254481"; class="${forSmart ? "intoFrmaes" : ""}">${info}</div>
           </div>
@@ -2722,7 +2523,7 @@ class Animtext {
         this.update = function(delta) {
             if (this.life) {
                 this.life -= delta;
-                if (cs.anotherVisual) {
+                if (settingFunctions.anotherVisual) {
                     this.y -= this.speed * delta * this.acc;
                     this.acc -= delta / (this.maxLife / 2.5);
                     if (this.life <= 200) {
@@ -2757,7 +2558,7 @@ class Animtext {
             ctxt.lineWidth = 10;
             ctxt.fillStyle = this.color;
             ctxt.font = `${this.scale}px 'Nunito', sans-serif`; // Corrected font family
-            if (cs.anotherVisual) {
+            if (settingFunctions.anotherVisual) {
                 ctxt.globalAlpha = this.alpha;
                 ctxt.strokeStyle = darkOutlineColor;
                 ctxt.strokeText(this.text, this.x - xOff, this.y - yOff);
@@ -5085,7 +4886,7 @@ class Player {
                     if (this.reloads[this.weaponIndex] > 0) {
                         this.reloads[this.weaponIndex] = Math.max(0, this.reloads[this.weaponIndex] - game.tickRate);
                         if (this == player) {
-                            if (cs.weaponGrinder) {
+                            if (settingFunctions.weaponGrinder) {
                                 for (let i = 0; i < Math.PI * 2; i += Math.PI / 2) {
                                     checkPlace(player.getItemType(22), i);
                                     buyEquip(40, 0)
@@ -5193,7 +4994,7 @@ function buyEquip(id, index) {
                     packet("c", 0, id, 0);
                 }
             } else {
-                if (cs.autoBuyEquip) {
+                if (settingFunctions.autoBuyEquip) {
                     let find = findID(hats, id);
                     if (find) {
                         if (player.points >= find.price) {
@@ -5227,7 +5028,7 @@ function buyEquip(id, index) {
                     packet("c", 0, id, 1);
                 }
             } else {
-                if (cs.autoBuyEquip) {
+                if (settingFunctions.autoBuyEquip) {
                     let find = findID(accessories, id);
                     if (find) {
                         if (player.points >= find.price) {
@@ -5265,7 +5066,7 @@ function place(id, rad, rmd) {
             selectToBuild(player.items[id]);
             sendAtck(1, rad);
             selectWeapon(player.weaponCode, 1);
-            if (rmd && cs.placeVis) {
+            if (rmd && settingFunctions.placeVis) {
                 placeVisible.push({
                     x: tmpX,
                     y: tmpY,
@@ -5295,7 +5096,7 @@ function checkPlace(id, rad) {
 }
 
 function syncEmBois() {
-    if (getEl("autoSync") && !cs.autoSync) {
+    if (getEl("autoSync") && !settingFunctions.autoSync) {
             sendChat("% !Sync %")
             my.autoAim = true;
             selectWeapon(player.weapons[0]);
@@ -5353,7 +5154,7 @@ function soldierMult() {
     return player.latestSkin == 6 ? 0.75 : 1;
 }
 let didFixed = false;
-if (getEl("antiAgeDie") && cs.antiAgeDie && enemy.length && (damage == 37.5 || damage == 38) && enemy.length[9] == 7) {
+if (getEl("antiAgeDie") && settingFunctions.antiAgeDie && enemy.length && (damage == 37.5 || damage == 38) && enemy.length[9] == 7) {
     didFixed = true;
     place(foodType, null);
     place(foodType, null);
@@ -5762,7 +5563,7 @@ function getRandomDir() {
     return [directions[Math.floor(Math.random() * 3)], directions[Math.floor(Math.random() * 3)]];
 }
 setInterval(() => {
-    if (cs.shouldHeal) {
+    if (settingFunctions.shouldHeal) {
         smartAntiInsta();
     }
 }, 100);
@@ -5921,7 +5722,7 @@ class Traps {
                     }
                 }
                 if (counts.placed > 0 && replacer && item.dmg) {
-                    if (near.dist2 <= items.weapons[player.weapons[0]].range + (player.scale * 1.8) && cs.spikeTick) {
+                    if (near.dist2 <= items.weapons[player.weapons[0]].range + (player.scale * 1.8) && settingFunctions.spikeTick) {
                         instaC.canSpikeTick = true;
                     }
                 }
@@ -5965,16 +5766,11 @@ class Traps {
             return false;
         }
         this.protect = function(aim) {
-            if (!cs.antiTrap) return;
-            if (player.items[4] && cs.antiTrap) {
+            if (!settingFunctions.antiTrap) return;
+            if (player.items[4]) {
                 checkPlace(2, (Math.PI / 2), -(Math.PI / 2), (Math.PI / 18), aim + Math.PI);
-                checkPlace(2, (Math.PI / 2), -(Math.PI / 2) - (Math.PI / 18), aim + Math.PI);
+                checkPlace(2, (Math.PI / 2), -(Math.PI / 2) -(Math.PI / 18), aim + Math.PI);
                 this.antiTrapped = true;
-                my.autoAim = true;
-                sendAutoGather();
-            } else {
-               my.autoAim = false;
-               this.antiTrapped = false;
             }
         };
 
@@ -6012,7 +5808,7 @@ class Traps {
         }
 
         this.autoPlace = function() {
-            if (!cs.autoPlace) return;
+            if (!settingFunctions.autoPlace) return;
 
             try {
                 if (!this.inTrap) {
@@ -6107,7 +5903,7 @@ class Traps {
         }
 
         this.replacer = function(findObj) { // replacer lmfao best
-            if (!findObj || !cs.autoReplace) return;
+            if (!findObj || !settingFunctions.autoReplace) return;
             if (!inGame) return;
             if (this.antiTrapped) return;
             game.tickBase(() => {
@@ -6115,10 +5911,10 @@ class Traps {
                 let objDst = UTILS.getDist(findObj, player, 0, 2);
                 let perfectAngle = Math.round(calculatePerfectAngle(findObj.x, findObj.y, player.x, player.y) / (Math.PI / 2)) * (Math.PI / 2);
                 let canPlaceCondition = [4, 5].includes(player.weapons[0]) && near.dist2 <= items.weapons[near.primaryIndex || 5].range + (near.scale * 1.2) && player.reloads[player.weapons[0]] == 0;
-                if (getEl("weaponGrinder") && cs.weaponGrinder && objDst <= items.weapons[player.weaponIndex].range + player.scale) return;
+                if (getEl("weaponGrinder") && settingFunctions.weaponGrinder && objDst <= items.weapons[player.weaponIndex].range + player.scale) return;
                 let danger = this.checkSpikeTick();
                 if (objDst <= 300 && near.dist2 <= 400) {
-                    if (near.dist2 <= 70 && canPlaceCondition && cs.spikeTick) {
+                    if (near.dist2 <= 70 && canPlaceCondition && settingFunctions.spikeTick) {
                         this.testCanPlace(2, -Math.PI / 4, Math.PI / 4, (Math.PI / 20), near.aim2, 1);
                         this.testCanPlace(4, -Math.PI / 4, Math.PI / 4, Math.PI / 12, near.aim2 + Math.PI, 1)
                     } else if (!danger && near.dist2 <= items.weapons[near.primaryIndex || 5].range + (near.scale * 1.8)) {
@@ -6170,8 +5966,8 @@ class Traps {
 
         this.preplacer = function() {
             if (traps.inTrap) return;
-            if (!cs.prePlace) return;
-            if (cs.prePlace) {
+            if (!settingFunctions.prePlace) return;
+            if (settingFunctions.prePlace) {
 
                 const weaponRange = items.weapons[player.weaponIndex].range + 70;
                 const rangeSquared = weaponRange ** 2;
@@ -6612,7 +6408,7 @@ class Ik {
                                 if (dst >= goal.c) {
                                     bQ(40, 0);
                                     bQ(10, 1);
-                                    if (cs.none) {
+                                    if (settingFunctions.none) {
                                         player.buildIndex != player.items[1] && selectToBuild(player.items[1]);
                                     } else {
                                         if ((player.weaponIndex != player.weapons[[10, 14].includes(player.weapons[1]) ? 1 : 0]) || player.buildIndex > -1) {
@@ -6650,7 +6446,7 @@ class Ik {
                                 if (dst <= goal.d) {
                                     bQ(40, 0);
                                     bQ(9, 1);
-                                    if (cs.none) {
+                                    if (settingFunctions.none) {
                                         player.buildIndex != player.items[1] && selectToBuild(player.items[1]);
                                     } else {
                                         if ((player.weaponIndex != player.weapons[[10, 14].includes(player.weapons[1]) ? 1 : 0]) || player.buildIndex > -1) {
@@ -7119,7 +6915,7 @@ function mouseUp(e) {
 mals.addEventListener("wheel", wheel, false);
 
 function wheel(e) {
-    if(player.shameCount > 1 && cs.antiShame) {
+    if(player.shameCount > 1 && settingFunctions.antiShame) {
         panicHeal();
         doAutoQ();
         buyEquip(7, 0);
@@ -7230,7 +7026,7 @@ function getAttackDir(debug) {
         if (!player)
             return "0";
         if (my.autoAim || ((clicks.left || (useWasd && near.dist2 <= items.weapons[player.weapons[0]].range + near.scale * 1.8 && !traps.inTrap)) && player.reloads[player.weapons[0]] == 0))
-            lastDir = cs.weaponGrinder ? "getSafeDir()" : enemy.length ? my.revAim ? "(near.aim2 + Math.PI)" : "near.aim2" : "getSafeDir()";
+            lastDir = settingFunctions.weaponGrinder ? "getSafeDir()" : enemy.length ? my.revAim ? "(near.aim2 + Math.PI)" : "near.aim2" : "getSafeDir()";
         else
             if (clicks.right && player.reloads[player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0]] == 0) lastDir = "getSafeDir()";
         else
@@ -7239,7 +7035,7 @@ function getAttackDir(debug) {
             if (breakObject.active) lastDir = "breakObject.aim";
         else
             if (!player.lockDir) {
-                if (cs.noDir) return "undefined";
+                if (settingFunctions.noDir) return "undefined";
                 lastDir = "getSafeDir()";
             }
         return lastDir;
@@ -7247,7 +7043,7 @@ function getAttackDir(debug) {
         if (!player)
             return 0;
         if (my.autoAim || ((clicks.left || (useWasd && near.dist2 <= items.weapons[player.weapons[0]].range + near.scale * 1.8 && !traps.inTrap)) && player.reloads[player.weapons[0]] == 0))
-            lastDir = cs.weaponGrinder ? getSafeDir() : enemy.length ? my.revAim ? (near.aim2 + Math.PI) : near.aim2 : getSafeDir();
+            lastDir = settingFunctions.weaponGrinder ? getSafeDir() : enemy.length ? my.revAim ? (near.aim2 + Math.PI) : near.aim2 : getSafeDir();
         else
             if (clicks.right && player.reloads[player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0]] == 0)
                 lastDir = getSafeDir();
@@ -7262,7 +7058,7 @@ function getAttackDir(debug) {
                 lastDir = SpikeDir();
             } else
                 if (!player.lockDir) {
-                    if (cs.noDir) return undefined;
+                    if (settingFunctions.noDir) return undefined;
                     lastDir = getSafeDir();
                 }
         return lastDir || 0;
@@ -7605,7 +7401,7 @@ function autoPush() {
             const pushDistance = 250;
             const pushDist = UTILS.getDist(near, spike, 2, 0);
             let inbullspam = false;
-            if (UTILS.getDist(near, spike, 2, 0) && !instaC.canSpikeTick && !clicks.right && !clicks.left && cs.autoPushDaggerSpam) {
+            if (UTILS.getDist(near, spike, 2, 0) && !instaC.canSpikeTick && !clicks.right && !clicks.left && settingFunctions.autoPushDaggerSpam) {
                 if (near.dist2 <= (items.weapons[player.weapons[0]].range + near.scale * 1.8) && !traps.inTrap) {
                     inbullspam = true;
                     if (!my.waitHit && player.reloads[player.weapons[0]] == 0 && !instaC.can) {
@@ -7825,7 +7621,7 @@ function killPlayer() {
         x: player.x,
         y: player.y,
     };
-    if (cs.autoRespawn) {
+    if (settingFunctions.autoRespawn) {
         getEl("diedText").style.display = "none";
         packet("M", {
             name: lastsp[0],
@@ -8131,7 +7927,7 @@ function showSettingText(life, setting) {
 let gp = [];
 let movementDirs = [];
 function handleMovement(final = false) {
-    if (traps.inTrap || !cs.safeFalk) return;
+    if (traps.inTrap || !settingFunctions.safeFalk) return;
 
     if (final) {
         if (!movementDirs.length) return move(lastMoveDir);
@@ -8262,7 +8058,7 @@ function updatePlayers(data) {
                             return UTILS.getDist(a, player, 0, 5) - UTILS.getDist(b, player, 0, 5);
                         })[0];
                         let distToSpike = items.weapons[tmpObj.weaponIndex].range;
-                        if (cs.autoBreakSpike && spike && UTILS.getDist(spike, player, 0, 2) <= distToSpike + spike.scale + player.scale) {
+                        if (settingFunctions.autoBreakSpike && spike && UTILS.getDist(spike, player, 0, 2) <= distToSpike + spike.scale + player.scale) {
                             breakObject.info = spike;
                             breakObject.aim = UTILS.getDirect(spike, player, 0, 2);
                             breakObject.active = true;
@@ -8710,7 +8506,7 @@ function updatePlayers(data) {
         });
         if (inGame) {
             if (enemy.length) {
-                if (cs.autoSync && (UTILS.getDist(player, nearHacker, 3, 3) <= items.weapons[player.primaryIndex].range + 63 || UTILS.getDist(player, nearHacker, 2, 2) <= items.weapons[player.primaryIndex].range + 63)) {
+                if (settingFunctions.autoSync && (UTILS.getDist(player, nearHacker, 3, 3) <= items.weapons[player.primaryIndex].range + 63 || UTILS.getDist(player, nearHacker, 2, 2) <= items.weapons[player.primaryIndex].range + 63)) {
                     syncEmBois();
                     hitBull(nearHacker.aim2, 0);
                 }
@@ -8732,10 +8528,10 @@ function updatePlayers(data) {
                     return UTILS.getDist(a, near, 0, 2) - UTILS.getDist(b, near, 0, 2);
                 })[0];
                 if (prehit) {
-                    if (near.dist2 <= items.weapons[player.weapons[0]].range + player.scale * 1.8 && cs.predictTick) {
+                    if (near.dist2 <= items.weapons[player.weapons[0]].range + player.scale * 1.8 && settingFunctions.predictTick) {
                         instaC.canSpikeTick = true;
                         instaC.syncHit = true;
-                        if (cs.revTick && player.weapons[1] == 15 && player.reloads[53] == 0 && instaC.perfCheck(player, near)) {
+                        if (settingFunctions.revTick && player.weapons[1] == 15 && player.reloads[53] == 0 && instaC.perfCheck(player, near)) {
                             instaC.revTick = true;
                         }
                     }
@@ -8996,7 +8792,7 @@ function updatePlayers(data) {
                     buyEquip(6, 0);
                     buyEquip(16, 1);
                 } else {
-                    let antiBull = enemy.length && cs.antiBull && ((clicksAB.value == "When Reloaded" && near.antiBull > 0) || (clicksAB.value == "Always" && near.reloads[near.primaryIndex] == 0));
+                    let antiBull = enemy.length && settingFunctions.antiBull && ((clicksAB.value == "When Reloaded" && near.antiBull > 0) || (clicksAB.value == "Always" && near.reloads[near.primaryIndex] == 0));
 
                     if (clicks.left || clicks.right) {
                         let anti = player.empAnti ? 22 : player.soldierAnti ? 6 : antiBull ? 11 : biomeGear(1, 1);
@@ -9007,7 +8803,7 @@ function updatePlayers(data) {
                                 buyEquip(13, 1);
                             }
                         } else if (clicks.left) {
-                            buyEquip(player.reloads[player.weapons[0]] == 0 ? cs.weaponGrinder ? 40 : 7 : anti, 0);
+                            buyEquip(player.reloads[player.weapons[0]] == 0 ? settingFunctions.weaponGrinder ? 40 : 7 : anti, 0);
                         } else if (clicks.right) {
                             buyEquip(player.reloads[clicks.right && player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0]] == 0 ? 40 : anti, 0);
                         }
@@ -9033,7 +8829,7 @@ function updatePlayers(data) {
                                 buyEquip(7, 0);
                                 buyEquip(13, 1);
                             } else {
-                                if (player.y2 >= config.mapScale / 5 - config.riverWidth / 5 && player.y2 <= config.mapScale / 5 + config.riverWidth / 5 && !cs.alwaysFlipper) {
+                                if (player.y2 >= config.mapScale / 5 - config.riverWidth / 5 && player.y2 <= config.mapScale / 5 + config.riverWidth / 5 && !settingFunctions.alwaysFlipper) {
                                     biomeGear(1);
                                 } else if (near.dist2 <= 300) {
                                     buyEquip(antiBull ? 11 : 6, 0);
@@ -9077,7 +8873,7 @@ function updatePlayers(data) {
                             buyEquip(7, 0);
                         } else {
                             if (clicks.left) {
-                                buyEquip(player.reloads[player.weapons[0]] == 0 ? cs.weaponGrinder ? 40 : 7 : player.empAnti ? 22 : 6, 0);
+                                buyEquip(player.reloads[player.weapons[0]] == 0 ? settingFunctions.weaponGrinder ? 40 : 7 : player.empAnti ? 22 : 6, 0);
                             } else if (clicks.right) {
                                 buyEquip(player.reloads[clicks.right && player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0]] == 0 ? 40 : player.empAnti ? 22 : 6, 0);
                             }
@@ -9129,7 +8925,7 @@ function updatePlayers(data) {
                 hatChanger();
                 accChanger();
             }
-            if (cs.autoPush && enemy.length && !traps.inTrap && !instaC.ticking) {
+            if (settingFunctions.autoPush && enemy.length && !traps.inTrap && !instaC.ticking) {
                 autoPush();
             } else {
                 if (my.autoPush) {
@@ -9507,18 +9303,18 @@ function updatePlayerValue(index, value, updateView) {
     if (player) {
         player[index] = value;
         if (index == "points") {
-            if (cs.autoBuy) {
+            if (settingFunctions.autoBuy) {
                 autoBuy.hat();
                 autoBuy.acc();
             }
         // kill chat
         } else if (index == "kills") {
-            if (cs.killChat && killchatters.value == "Normal") {
+            if (settingFunctions.killChat && killchatters.value == "Normal") {
                 io.send("6", value + "Ppl have died 2 OP MOD");// change this too
                 setTimeout(() => {1500
                 io.send("6", "TnT CLIENT On Top!");// change this
                 }, 1000);
-            } else if (cs.killChat && killchatters.value == "NoHax") {
+            } else if (settingFunctions.killChat && killchatters.value == "NoHax") {
                 io.send("6", value + "People Have Fallen");// change this too
                 setTimeout(() => {1500
                 io.send("6", "Stop Hacking!!!");// change this
@@ -9604,7 +9400,7 @@ function updateNotifications() {
         var tmpN = allianceNotifications[0];
         UTILS.removeAllChildren(noticationDisplay);
         noticationDisplay.style.display = "block";
-        if (cs.acceptplayers && !kicklist.includes(tmpN.sid)) {
+        if (settingFunctions.acceptplayers && !kicklist.includes(tmpN.sid)) {
             aJoinReq(1);
         }
         UTILS.generateElement({
@@ -11125,7 +10921,7 @@ function renderGameObjects(layer, xOffset, yOffset) {
                     mainContext.drawImage(tmpSprite, tmpX - (tmpSprite.width / 2), tmpY - (tmpSprite.height / 2));
                 }
             }
-            if (cs.buildingHealth) {
+            if (settingFunctions.buildingHealth) {
                 if (layer == 3) {
                     if (tmpObj.health < tmpObj.maxHealth) {
                         const endAngle = ((tmpObj.health / tmpObj.maxHealth) * 360) * (Math.PI / 180);
@@ -11309,27 +11105,16 @@ function renderMinimap(delta) {
 }
 
 // ICONS:
-let crossHairs = ["https://cdn.discordapp.com/attachments/1339237455420981360/1351944705897795667/1782436.png?ex=67dc381f&is=67dae69f&hm=519b329f23587fcb0231581539f1a82f30431b83b37281a1d391f2bc59e43985&", "https://cdn.discordapp.com/attachments/1339237455420981360/1351944705897795667/1782436.png?ex=67dc381f&is=67dae69f&hm=519b329f23587fcb0231581539f1a82f30431b83b37281a1d391f2bc59e43985&"];
-let crossHairSprites = {};
-let iconSprites = {};
-let icons = ["crown", "skull"];
-
+var iconSprites = {};
+var icons = ["crown", "skull"];
 function loadIcons() {
-    for (let i = 0; i < icons.length; ++i) {
-        let tmpSprite = new Image();
+    for (var i = 0; i < icons.length; ++i) {
+        var tmpSprite = new Image();
         tmpSprite.onload = function() {
             this.isLoaded = true;
         };
-        tmpSprite.src = "./../img/icons/" + icons[i] + ".png";
+        tmpSprite.src = ".././img/icons/" + icons[i] + ".png";
         iconSprites[icons[i]] = tmpSprite;
-    }
-    for (let i = 0; i < crossHairs.length; ++i) {
-        let tmpSprite = new Image();
-        tmpSprite.onload = function () {
-            this.isLoaded = true;
-        };
-        tmpSprite.src = crossHairs[i];
-        crossHairSprites[i] = tmpSprite;
     }
 }
 loadIcons();
@@ -11462,7 +11247,7 @@ function updateGame() {
         mainContext.fillStyle = "#8ac8ff";
         renderWaterBodies(xOffset, yOffset, mainContext, (waterMult - 1) * 250);
     }
-    if (getEl("showGrid") && !cs.showGrid) {
+    if (getEl("showGrid") && !settingFunctions.showGrid) {
         mainContext.lineWidth = 4;
         mainContext.strokeStyle = "#000";
         mainContext.globalAlpha = 0.05;
@@ -11771,7 +11556,7 @@ function updateGame() {
 }
 
 // MINIMAP STYLE
-if (getEl("customMap") && cs.customMap) {
+if (getEl("customMap") && settingFunctions.customMap) {
     mapDisplay.style.backgroundImage = "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAYAAACKAxD9AAAAAXNSR0IArs4c6QAAAqpJREFUeF7t3TFOVWEYhGHOFl2LFK7BJVixC2tadqEL0UQTFHIh87cvD/U0M/PmnPnuJXB9//nj152fD5/ABYQPz8CfAICAAyBg4F8Cngho8ETAgCcCBl4l4NUACa8GDHg1YMCrAQO3ErARcGEjYMBGwICNgAEbAQNvJmAsgsNYxICxiAFjEQPGIgaMRQy8n8B1//DZbzGj5A4IIPh7PnoiIAEIGHhOwBMBDF4NGPjvk0UbAQ42AgZsBAy8TMBYRISxiAFjEQOvv4Z2NWDC1YABVwMGXA0YuJGA8xEWzkcMOB8x4HzEwK0EbARc2AgYsBEwYCNgwEbAwJsJGIvgMBYxYCxiwFjEgLGIAWMRA+8n4GpAiKsBA64GDLgaMOBqwICrAQOuBgwMCVyfvnzzV9WGoOoSINQbHv0BYQyqLgNCveHRHxDGoOoyINQbHv0BYQyqLgNCveHRn6+hx6DqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0R8QxqDqMiDUGx79AWEMqi4DQr3h0d/19PjV/2sYwyrLgFBu98AbEA7CKkuBUG73wBsQDsIqS4FQbvfAGxAOwipLgVBu98AbEA7CKkuBUG73wBsQDsIqS4FQbvfAGxAOwipLgVBu98AbEA7CKkuBUG73wBsQDsIqS4FQbvfAGxAOwipLgVBu98AbEA7CKkuBUG73wNtv2qdqGgKxGbgAAAAASUVORK5CYII=')";
 } else {
     mapDisplay.style.backgroundImage = "";
