@@ -870,9 +870,6 @@ function createGUI() {
 }
 createGUI();
 
-// chat shit
-
-
 // mod menu html & css
 let backgroundEffect = document.createElement("div");
 backgroundEffect.id = "backgroundEffect";
@@ -2614,7 +2611,9 @@ class Textmanager {
     }
 }
 let Trees = [], Foodbush = [], StoneOreok = [], GoldMines = [];
-
+function findAllianceBySid(sid) {
+    return player.team ? alliancePlayers.find((THIS) => THIS === sid) : null;
+}
 class GameObject {
     constructor(sid) {
         this.sid = sid;
@@ -4938,7 +4937,7 @@ class Player {
 
         // FOR ANTI INSTA:
         this.addDamageThreat = function(tmpObj) {
-            fastHealing(1000);
+            HealC.fastHealing(1000);
             let primary = {
                 weapon: this.primaryIndex,
                 variant: this.primaryVariant
@@ -5172,422 +5171,245 @@ if (getEl("antiAgeDie") && settingFunctions.antiAgeDie && enemy.length && (damag
     place(foodType, null); //4 = full hp
     didFixed = false;
 };
-function getAttacker(damaged) {
-    let attackers = enemy.filter(tmp => {
-        let damages = new Damages(items);
-        let dmg = damages.weapons[tmp.weaponIndex];
-        let by = tmp.weaponIndex < 9 ? [dmg[0], dmg[1], dmg[2], dmg[3]] : [dmg[0], dmg[1]];
-        let rule = {
-            one: tmp.dist2 <= 300,
-            two: by.includes(damaged),
-            three: tmp.attacked
-        }
-        return rule.one && rule.two && rule.three;
-    });
-    return attackers;
-}
-function healingTrap() {
-    let maxPotential = getMaxPot();
-    let pingHeal = function() {
-        return Math.max(0, maxPotential - window.pingTime);
-        if (pingTime >= 90) {
-            doAutoQ = true;
-        } else {
-            doAutoQ = false;
-        }
-    };
-    if (true) {
-        setTimeout(() => {
-            for (let i = 0; i < healthBased(); i++) {
-                place(0, getAttackDir());
+function panicHeal() {
+            if (player.health < 50) {
+                for (let i = 0; i < 10; i++) {
+                    place(0, getAttackDir());
+                }
             }
-        }, 2);
-    } else {
-        setTimeout(() => {
-            for (let i = 0; i < healthBased(); i++) {
-                place(0, getAttackDir());
+        }
+class Healing {
+    constructor() {
+        function EmpMult() {
+            return player.skinIndex == 22 ? 0.75 : 1;
+        }
+
+        function smartAntiInsta() {
+            let enemies = getNearbyEnemies();
+            for (let i = 0; i < enemies.length; i++) {
+                let e = enemies[i];
+                if (e.shooting && getDist(player, e) < 200 && !e.blocked) {
+                    place(getRandomDir());
+                }
             }
-        }, 2);
-    }
-}
-function getMaxPot() {
-    let dmg = 0;
-    enemy.forEach(tmp => {
-        if (getDist(player, tmp) - 63 <= items.weapons[tmp.weapons[0]].range) {
-            dmg += player.checkCanInsta(false);
         }
-    });
-    return dmg;
-}
-function instaheal(e, t) {
-    let foodType = (player.items[0] == 0 ? 20 : player.items[0] == 1 ? 40 : 30)
-    let times = (e == "max" ? (100-player.health)/foodType : e == (null || undefined) ? 1 : e);
-    for(let i = 0; i < times; i++) {
-        place(0, getAttackDir());
-    }
-}
-function fastHealing(speed) {
-    let value = player.health;
-    let damaged
-    let attackers = getAttacker(damaged);
-    let gearDmgs = [0.25, 0.45].map((val) => val * items.weapons[player.weapons[0]].dmg * soldierMult());
-    let includeSpikeDmgs = !my.reSync && gearDmgs.includes(damaged);
-    let maxPotential = getMaxPot();
-    let canAntiHeal = false;
 
-
-    let pingHeal = function() {
-        return Math.max(0, maxPotential - window.pingTime);
-    };
-    let autoHeal;
-    let doMaxHeal = function () {
-        clearInterval(autoHeal);
-        for (let i = 0; i < Math.ceil(Math.min(100 - value, 50) / items.list[player.items[0]].consume); i++) {
-            place(player.items[0]);
+        function getNearbyEnemies() {
+            let enemies = [];
+            for (let i = 0; i < enemy.length; i++) {
+                let e = enemy[i];
+                if (getDist(player, e) < 250) {
+                    enemies.push(e);
+                }
+            }
+            return enemies;
         }
-    };
-    if (speed >= 100000) {
-        canAntiHeal = true;
-    } else {
-        canAntiHeal = false;
-    }
 
-    // Heal:
-    setTimeout(()=>{
-        if (traps.inTrap) {
-            healingTrap();
-        } else {
-            setTimeout(()=>{
-                for (let i = 0; i < healthBased(); i++) {
-                    if (canAntiHeal == true && value <= 50 && near.checkCanInsta(true) >= 100) {
-                        setTimeout(()=>{
-                            place(0, getAttackDir());
-                            setTimeout(()=>{
-                                place(0, getAttackDir());
-                                setTimeout(()=>{
-                                    place(0, getAttackDir());
-                                }, speed*5);
-                            }, speed*4);
-                        }, speed*3);
-                    } else {
+        function getRandomDir() {
+            let directions = [-1, 0, 1];
+            return [directions[Math.floor(Math.random() * 3)], directions[Math.floor(Math.random() * 3)]];
+        }
+        setInterval(() => {
+            if (settingFunctions.shouldHeal) {
+                smartAntiInsta();
+            }
+        }, 100);
+
+        function checkHealth() {
+            return player.skinIndex != 45 && !autoQ && !my.antiSync;
+        }
+        this.getAttacker = function(damaged) {
+            let attackers = enemy.filter(tmp => {
+                let damages = new Damages(items);
+                let dmg = damages.weapons[tmp.weaponIndex];
+                let by = tmp.weaponIndex < 9 ? [dmg[0], dmg[1], dmg[2], dmg[3]] : [dmg[0], dmg[1]];
+                let rule = {
+                    one: tmp.dist2 <= 300,
+                    two: by.includes(damaged),
+                    three: tmp.attacked
+                }
+                return rule.one && rule.two && rule.three;
+            });
+            return attackers;
+        }
+        this.healingTrap = function() {
+            let maxPotential = getMaxPot();
+            let pingHeal = function() {
+                return Math.max(0, maxPotential - window.pingTime);
+                if (pingTime >= 90) {
+                    doAutoQ = true;
+                } else {
+                    doAutoQ = false;
+                }
+            };
+            if (true) {
+                setTimeout(() => {
+                    for (let i = 0; i < HealC.healthBased(); i++) {
                         place(0, getAttackDir());
                     }
-                    healer();
+                }, 2);
+            } else {
+                setTimeout(() => {
+                    for (let i = 0; i < HealC.healthBased(); i++) {
+                        place(0, getAttackDir());
+                    }
+                }, 2);
+            }
+        }
+        this.calcDmg = function(value) {
+            return value * player.skinIndex == 6 ? 0.75 : 1;
+        }
+        this.getMaxPot = function() {
+            let dmg = 0;
+            enemy.forEach(tmp => {
+                if (getDist(player, tmp) - 63 <= items.weapons[tmp.weapons[0]].range) {
+                    dmg += player.checkCanInsta(false);
                 }
-            }, speed*2);
+            });
+            return dmg;
         }
-    }, speed);
-}
-// ADVANCED:
-function applCxC(value) {
-    if (player.health == 100) return 0;
-    if (player.skinIndex != 45 && player.skinIndex != 56) {
-        return Math.ceil(value / items.list[player.items[0]].healing);
-    }
-    return 0;
-}
-function healthBased() {
-    if (player.health == 100) return 0;
-    if (player.skinIndex != 45 && player.skinIndex != 56) {
-        return Math.ceil((100 - player.health) / items.list[player.items[0]].healing);
-    }
-    return 0;
-}
-function calcDmg(value) {
-    return value * player.skinIndex == 6 ? 0.75 : 1;
-}
-// LATER:
-function predictHeal(times) {
-    for (let i in times) {
-        place(0, getAttackDir());
-    }
-}
-function antiSyncHealing(timearg) {
-    my.antiSync = true;
-    setTimeout(() => {
-        clearInterval(healAnti);
-        setTimeout(() => {
-            my.antiSync = false;
-        }, game.tickRate);
-    }, game.tickRate);
-}
-function heal() {
-    if (player.health === 100) {
-        return;
-    }
-    if (player.skinIndex !== 70 && player.skinIndex !== 75) {
-        let value = Math.ceil(100 / items.list[player.items[0]].healing);
-        if (player.health === 58.75 && player.skinIndex === 6) {
-            value = 1;
-        }
-        for (let i = 0; i < value; i++) {
-            place(0, getAttackDir());
-        }
-    }
-}
-function healOnResourceGain() {
-    if (player.wood > player.woodLast || player.stone > player.stoneLast || player.food > player.foodLast) {
-        place(0, getAttackDir());
-    }
-}
-function findAllianceBySid(sid) {
-    return player.team ? alliancePlayers.find((THIS) => THIS === sid) : null;
-}
-function healOnEnemySight() {
-    if (enemy.length > 0) {
-        place(0, getAttackDir());
-    }
-}
-function healOnLowHealth() {
-    if (player.health < 50) {
-        place(0, getAttackDir());
-    }
-}
-function healOnNoWeapon() {
-    if (player.items[0] === 0) {
-        place(0, getAttackDir());
-    }
-}
-function healOnLevelUp() {
-    if (player.level > player.levelLast) {
-        place(0, getAttackDir());
-    }
-}
-function getNearestEnemyDistance() {
-    let nearestEnemy = enemy.reduce((nearest, current) => {
-        return nearest.dist < current.dist ? nearest : current;
-    });
-    return nearestEnemy.dist;
-}
-function isBeingAttackedBy(attackerId) {
-    let attackers = enemy.filter(tmp => tmp.id === attackerId && tmp.attacked);
-    return attackers.length > 0;
-}
-function healOverTime() {
-    if (player.health < 100) {
-        place(0, getAttackDir());
-    }
-}
-function panicHeal() {
-    if (player.health < 50) {
-        for (let i = 0; i < 10; i++) {
-            place(0, getAttackDir());
-        }
-    }
-}
-function defensiveHeal() {
-    if (player.latestDamage > 0 && player.health < 100) {
-        place(0, getAttackDir());
-    }
-}
-function getAttacker(damaged) {
-    let attackers = enemy.filter(tmp => {
-        let damages = new Damages(items);
-        let dmg = damages.weapons[tmp.weaponIndex];
-        let by = tmp.weaponIndex < 9 ? [dmg[0], dmg[1], dmg[2], dmg[3]] : [dmg[0], dmg[1]];
-        let rule = {
-            one: tmp.dist2 <= 300,
-            two: by.includes(damaged),
-            three: tmp.attacked
-        }
-        return rule.one && rule.two && rule.three;
-    });
-    return attackers;
-}
-function healer(extra = 0) {
-    if (extra == 0) {
-        for (let i = 0; i < healthBased(); i++) {
-            panicHeal();
-            healer33();
-        }
-    } else {
-        for (let i = 0; i < healthBased() + extra; i++) {
-            fastHealing(1000);
-        }
-    }
-}
-let resourceGainHealCooldown = false;
-function healOnResourceGainAdvanced() {
-    if (player.wood > player.woodLast || player.stone > player.stoneLast || player.food > player.foodLast) {
-        if (!resourceGainHealCooldown) {
-            place(0, getAttackDir());
-            resourceGainHealCooldown = true;
+        this.fastHealing = function(speed) {
+            let value = player.health;
+            let damaged
+            let attackers = HealC.getAttacker(damaged);
+            let gearDmgs = [0.25, 0.45].map((val) => val * items.weapons[player.weapons[0]].dmg * soldierMult());
+            let includeSpikeDmgs = !my.reSync && gearDmgs.includes(damaged);
+            let maxPotential = HealC.getMaxPot();
+            let canAntiHeal = false;
+            let pingHeal = function() {
+                return Math.max(0, maxPotential - window.pingTime);
+            };
+            let autoHeal;
+            let doMaxHeal = function() {
+                clearInterval(autoHeal);
+                for (let i = 0; i < Math.ceil(Math.min(100 - value, 50) / items.list[player.items[0]].consume); i++) {
+                    place(player.items[0]);
+                }
+            };
+            if (speed >= 100000) {
+                canAntiHeal = true;
+            } else {
+                canAntiHeal = false;
+            }
+            // Heal:
             setTimeout(() => {
-                resourceGainHealCooldown = false;
-            }, 1000);
-        }
-    }
-}
-// GLOBAL VARIABLES
-let lastPlayerCount = 0;
-let lastZone = "";
-// FUNCTIONS
-function playerCountFunction() {
-    return Object.keys(players).length;
-}
-function healOnPlayerJoin() {
-    if (playerCountFunction() > lastPlayerCount) {
-        place(0, getAttackDir());
-    }
-    lastPlayerCount = playerCountFunction();
-}
-function healOnAreaChange() {
-    if (player.zone !== lastZone) {
-        place(0, getAttackDir());
-    }
-    lastZone = player.zone;
-}
-// GAME TICK
-function gameTick() {
-    healOnPlayerJoin();
-    healOnAreaChange();
-}
-function healOnWin() {
-    if (player.wins > player.winsLast) {
-        place(0, getAttackDir());
-    }
-}
-function healOnHealingItemPickup() {
-    let healingItems = [101, 102, 103, 104];
-    if (healingItems.includes(player.items[0])) {
-        place(0, getAttackDir());
-    }
-}
-function healOnFlagCapture() {
-    if (player.flagCaptures > player.flagCapturesLast) {
-        place(0, getAttackDir());
-    }
-}
-// ADVANCED:
-function applCxC(value) {
-    if (player.health == 100) {
-        return 0;
-    }
-    if (player.skinIndex != 45 && player.skinIndex != 56) {
-        return Math.ceil(value / items.list[player.items[0]].healing);
-    }
-    return 0;
-}
-function healthBased() {
-    if (player.health == 100) {
-        return 0;
-    }
-    if (player.skinIndex != 45 && player.skinIndex != 56) {
-        return Math.ceil((100 - player.health) / items.list[player.items[0]].healing);
-    }
-    return 0;
-}
-function calcDmg(value) {
-    return value * player.skinIndex == 6 ? 0.75 : 1;
-}
-let slowHeal = function(timer) {
-    setTimeout(() => {
-        healer();
-    }, 25);
-}
-let isHealing = false;
-let delay = 20;
-function Staryheal() {
-    if (!isHealing && player.health < 100) {
-        isHealing = true;
-        if (player.health < 95) {
-            place(0, getAttackDir());
-            fastHealing(1000);// fast heal
-            isHealing = false;
-        } else {
-            const healingDelay = 5;
-            const healingIterations = Math.ceil((100 - player.health) / 10); // making it have delay so it wont packet spam
-            let iterationCount = 0;
-            function performHealing() {
-                if (iterationCount < healingIterations) {
-                    setTimeout(() => {
-                        healer(); // slow heal
-                        iterationCount++;
-                        performHealing();
-                    }, healingDelay);
+                if (traps.inTrap) {
+                    healingTrap();
                 } else {
-                    isHealing = false;
+                    setTimeout(() => {
+                        for (let i = 0; i < HealC.healthBased(); i++) {
+                            if (canAntiHeal == true && value <= 50 && near.checkCanInsta(true) >= 100) {
+                                setTimeout(() => {
+                                    place(0, getAttackDir());
+                                    setTimeout(() => {
+                                        place(0, getAttackDir());
+                                        setTimeout(() => {
+                                            place(0, getAttackDir());
+                                        }, speed * 5);
+                                    }, speed * 4);
+                                }, speed * 3);
+                            } else {
+                                place(0, getAttackDir());
+                            }
+                            HealC.healer();
+                        }
+                    }, speed * 2);
+                }
+            }, speed);
+        }
+        this.predictHeal = function(random, times) {
+            for (let i in random && times) {
+                place(0, getAttackDir());
+            }
+        }
+        this.antiSyncHealing = function(timearg) {
+            my.antiSync = true;
+            setTimeout(() => {
+                clearInterval(healAnti);
+                setTimeout(() => {
+                    my.antiSync = false;
+                }, game.tickRate);
+            }, game.tickRate);
+        }
+        this.healer = function() {
+            var extra = 0;
+            if (player.health === 100) {
+                return;
+            }
+            if (player.skinIndex !== 70 && player.skinIndex !== 75) {
+                let value = Math.ceil(100 / items.list[player.items[0]].healing);
+                if (player.health === 58.75 && player.skinIndex === 6) {
+                    value = 1;
+                }
+                for (let i = 0; i < value; i++) {
+                    place(0, getAttackDir());
+                }
+            } else if (player.latestDamage > 0 && player.health < 100) {
+                place(0, getAttackDir());
+            } else if (extra == 0) {
+                for (let i = 0; i < HealC.healthBased(); i++) {
+                    HealC.panicHeal();
+                }
+            } else {
+                for (let i = 0; i < HealC.healthBased() + extra; i++) {
+                    HealC.fastHealing(1000);
+                    return Math.ceil((100 - player.health) / items.list[player.items[0]].healing);
                 }
             }
-            performHealing();
+        }
+        this.slowHeal = function(timer) {
+            setTimeout(() => {
+                place(0, getAttackDir());
+            }, 25);
+        }
+        // ADVANCED:
+        this.applCxC = function(value) {
+            if (player.health == 100) return 0;
+            if (player.skinIndex != 45 && player.skinIndex != 56) {
+                return Math.ceil(value / items.list[player.items[0]].healing);
+            }
+            return 0;
+        }
+        this.healthBased = function() {
+            if (player.health == 100) return 0;
+            if (player.skinIndex != 45 && player.skinIndex != 56) {
+                return Math.ceil((100 - player.health) / items.list[player.items[0]].healing);
+            }
+            return 0;
+        }
+        // madee by stary modified by me
+        this.Staryheal = function() {
+            let isHealing = false;
+            let delay = 20;
+            if (!isHealing && player.health < 100) {
+                isHealing = true;
+                if (player.health < 95) {
+                    place(0, getAttackDir());
+                    HealC.fastHealing(1000); // fast heal
+                    panicHeal();
+                    isHealing = false;
+                } else {
+                    const healingDelay = 5;
+                    const healingIterations = Math.ceil((100 - player.health) / 10); // making it have delay so it wont packet spam
+                    let iterationCount = 0;
+
+                    function performHealing() {
+                        if (iterationCount < healingIterations) {
+                            setTimeout(() => {
+                                HealC.healer(); // slow heal
+                                iterationCount++;
+                                performHealing();
+                            }, healingDelay);
+                        } else {
+                            isHealing = false;
+                        }
+                    }
+                    performHealing();
+                }
+            }
         }
     }
-}
-// LATER:
-function predictHeal(random) {
-    for (let Preidict in random) {
-        place(0, getAttackDir());
-        console.log("health predicted");
-    }
-}
-function antiSyncHealing(timearg) {
-    my.antiSync = true;
-    let healAnti = setInterval(() => {
-        if (player.shameCount < 5) {
-            doAutoQ();
-        }
-    }, 75);
-    setTimeout(() => {
-        clearInterval(healAnti);
-        setTimeout(() => {
-            my.antiSync = false;
-        }, game.tickRate);
-    }, game.tickRate);
-}
-function EmpMult() {
-    return player.skinIndex == 22 ? 0.75 : 1;
-}
-function healer33() {
-    for (let i = 0; i < healthBased(); i++) {
-        place(0, getAttackDir());
-    }
-}
-function healer1() {
-    place(0, getAttackDir());
-    return Math.ceil((100 - player.health) / items.list[player.items[0]].healing);
-}
-
-function smartAntiInsta() {
-    let enemies = getNearbyEnemies();
-    for (let i = 0; i < enemies.length; i++) {
-        let e = enemies[i];
-        if (e.shooting && getDist(player, e) < 200 && !e.blocked) {
-            place(getRandomDir());
-        }
-    }
-}
-
-function getNearbyEnemies() {
-    let enemies = [];
-    for (let i = 0; i < enemy.length; i++) {
-        let e = enemy[i];
-        if (getDist(player, e) < 250) {
-            enemies.push(e);
-        }
-    }
-    return enemies;
-}
-
-function getRandomDir() {
-    let directions = [-1, 0, 1];
-    return [directions[Math.floor(Math.random() * 3)], directions[Math.floor(Math.random() * 3)]];
-}
-setInterval(() => {
-    if (settingFunctions.shouldHeal) {
-        smartAntiInsta();
-    }
-}, 100);
-let healSan = function() {
-    if (cfg.isSandbox) {
-        return 100;
-    } else {
-        return 80;
-    }
-}
-let checkHealth = function() {
-    return player.skinIndex != 45 && !autoQ && !my.antiSync;
-}
-
+};
 
 const placedSpikePositions = new Set();
 const placedTrapPositions = new Set();
@@ -5763,12 +5585,6 @@ class Traps {
                         counts.block = `blocked`;
                         break;
                     }
-                    if (danger && near.dist2 <= 200 && tdf) {
-                        sendChat(":skull:")
-                        my.anti0Tick = 1;
-                        healer();
-                        return true;
-                    }
                 }
             } catch (err) {
                 return null;
@@ -5781,6 +5597,7 @@ class Traps {
                 checkPlace(2, (Math.PI / 2), -(Math.PI / 2), (Math.PI / 18), aim + Math.PI);
                 checkPlace(2, (Math.PI / 2), -(Math.PI / 2) -(Math.PI / 18), aim + Math.PI);
                 this.antiTrapped = true;
+                StaryHeal();
             }
         };
 
@@ -6657,6 +6474,9 @@ class Autoupgrade {
         };
     };
 };
+function calcDmg(value) {
+    return value * player.skinIndex == 6 ? 0.75 : 1;
+}
 class Damages {
     constructor(items) {
         // 0.75 1 1.125 1.5
@@ -6680,6 +6500,7 @@ class Damages {
 let tmpList = [];
 
 // LOADING:
+let HealC = new Healing();
 let UTILS = new Utils();
 let items = new Items();
 let objectManager = new Objectmanager(GameObject, gameObjects, UTILS, config);
@@ -6755,7 +6576,7 @@ function antiProj(tmpObj, dir, range, speed, index, weaponIndex) {
             } else {
                 if (projectileCount >= 2) {
                     place(3, tmpObj.aim2);
-                    healer();
+                    Staryheal();
                     sendChat("Sync 4 Gays & Dogass");
                     buyEquip(22, 0);
                     buyEquip(13, 1);
@@ -6770,7 +6591,7 @@ function antiProj(tmpObj, dir, range, speed, index, weaponIndex) {
                 } else if (projectileCount >= 2) {
                         return Math.ceil((100 - player.health) / items.list[player.items[0]].healing);
                         sendChat("KREEEEEEE-----");
-                        fastHealing(1000);
+                        HealC.fastHealing(1000);
                         buyEquip(6, 0);
                 }
             }
@@ -7138,9 +6959,6 @@ function keyDown(event) {
                     if (chatHolder) {
                         const currentDisplay = chatHolder.style.display;
                         chatHolder.style.display = currentDisplay === "none" ? "block" : "none";
-                        sM = true;
-                    } else {
-                        sM = false;
                     }
                 }
             }
@@ -7206,7 +7024,7 @@ function doBoostTick() {
 
 let autoChatActive = false;// Initially closed
 let chatInterval; // Variable for loop
-let messages = ["---","Hello there,","I hate Japanese,","Cuz they are retarded","And mock us off the board","And there is Kusoi,","He calls everyone a dogass","Aw,what a retard!","Let's see if he dies to insta!","Alr,do you ask to kill you?","Cuz this mod is","EDITED BY LEGEND","Oh noes,","Death is Coming!","Why not get retarded too,","When there's a OP insta?","DOGASS!!!","---","I Gotta Fly Some","Planes---Into","A Couple Buildings","In Manhattan","I'-I'm Osama","Run Tell Obama","Let me fly Air Force 1",];
+let messages = ["---","Hello there,","I hate Project B,","Cuz they are retarded","And mock us off the board","And there is Kusoi,","He calls everyone a dogass","Aw,what a retard!","Let's see if he dies to insta!","Alr,do you ask to kill you?","Cuz this mod is","EDITED BY LEGEND","Oh noes,","Death is Coming!","Why not get retarded too,","When there's a OP insta?","DOGASS!!!","---","I Gotta Fly Some","Planes---Into","A Couple Buildings","In Manhattan","I'-I'm Osama","Run Tell Obama","Let me fly Air Force 1",];
 let msgIndex = 0; //queue
 document.addEventListener("keydown", function(event) {
     if (event.key === "Alt") {
@@ -8060,7 +7878,7 @@ function updatePlayers(data) {
                     tmpObj.shameTimer = 0;
                     tmpObj.shameCount = 0;
                     if (tmpObj == player) {
-                        healer();
+                        HealC.healer();
                     }
                 }
                 if (tmpObj == player) {
@@ -8098,8 +7916,8 @@ function updatePlayers(data) {
                         if (traps.inTrap && checkNigers) {
                             traps.outOfTrap = true;
                             my.anti0Tick = 2;
-                            healer();
-                            if (player.health < 45) healer();
+                            HealC.healer();
+                            if (player.health < 45) Staryheal();
                         } else traps.outOfTrap = false;
                         traps.inTrap = false;
                         traps.info = {};
@@ -8110,8 +7928,8 @@ function updatePlayers(data) {
                         sendChat("EAT KEBAB");
                         traps.outOfTrap = true;
                         my.anti0Tick = 2;
-                        healer();
-                        if (player.health < 45) healer();
+                        HealC.healer();
+                        if (player.health < 45) HealC.healer();
                     } else {
                         traps.outOfTrap = false;
                         traps.inTrap = false;
@@ -8264,7 +8082,7 @@ function updatePlayers(data) {
                             bullTicked = true;
                         }
                         if (inGame) {
-                            let attackers = getAttacker(damaged);
+                            let attackers = HealC.getAttacker(damaged);
                             let gearDmgs = [0.25, 0.45].map(val => val * items.weapons[player.weapons[0]].dmg * soldierMult());
                             let includeSpikeDmgs = enemy.length ? !bullTicked && gearDmgs.includes(damaged) && near.skinIndex == 11 : false;
                             let healTimeout = 140 - window.pingTime;
@@ -8272,11 +8090,11 @@ function updatePlayers(data) {
                             let slowHeal = function(timer, tickBase) {
                                 if (!tickBase) {
                                     setTimeout(() => {
-                                        healer();
+                                        HealC.healer();
                                     }, timer);
                                 } else {
                                     game.tickBase(() => {
-                                        healer();
+                                        HealC.healer();
                                     }, 2);
                                 }
                             };
@@ -8286,12 +8104,12 @@ function updatePlayers(data) {
                                         if (damaged < 75) {
                                             slowHeal(healTimeout);
                                         } else {
-                                            healer();
+                                            HealC.healer();
                                         }
                                     }
                                     if ([1, 2, 6].includes(near.primaryIndex)) {
                                         if (damaged >= 25 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 5) {
-                                            healer();
+                                            HealC.healer();
                                         } else {
                                             slowHeal(healTimeout);
                                         }
@@ -8302,19 +8120,19 @@ function updatePlayers(data) {
                                                 if (damaged >= 35 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 5 && game.tick - player.antiTimer > 1) {
                                                     tmpObj.canEmpAnti = true;
                                                     tmpObj.antiTimer = game.tick;
-                                                    healer();
+                                                    HealC.healer();
                                                 } else {
                                                     slowHeal(healTimeout);
                                                 }
                                             } else if (damaged > 35 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 5 && game.tick - player.antiTimer > 1) {
                                                 tmpObj.canEmpAnti = true;
                                                 tmpObj.antiTimer = game.tick;
-                                                healer();
+                                                HealC.healer();
                                             } else {
                                                 slowHeal(healTimeout);
                                             }
                                         } else if (damaged >= 25 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 4) {
-                                            healer();
+                                            HealC.healer();
                                         } else {
                                             slowHeal(healTimeout);
                                         }
@@ -8322,12 +8140,12 @@ function updatePlayers(data) {
                                     if (near.primaryIndex == 4) {
                                         if (near.primaryVariant >= 1) {
                                             if (damaged >= 10 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 4) {
-                                                healer();
+                                                HealC.healer();
                                             } else {
                                                 slowHeal(healTimeout);
                                             }
                                         } else if (damaged >= 35 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 3) {
-                                            healer();
+                                            HealC.healer();
                                         } else {
                                             slowHeal(healTimeout);
                                         }
@@ -8335,20 +8153,20 @@ function updatePlayers(data) {
                                     if ([undefined, 5].includes(near.primaryIndex)) {
                                         if (near.secondaryIndex == 10) {
                                             if (dmg >= (includeSpikeDmgs ? 10 : 20) && tmpObj.damageThreat + dmg >= 80 && tmpObj.shameCount < 6) {
-                                                healer();
+                                                HealC.healer();
                                             } else {
                                                 slowHeal(healTimeout);
                                             }
                                         } else if (near.primaryVariant >= 2 || near.primaryVariant == undefined) {
                                             if (dmg >= (includeSpikeDmgs ? 15 : 20) && tmpObj.damageThreat + dmg >= 50 && tmpObj.shameCount < 6) {
-                                                healer();
+                                                HealC.healer();
                                             } else {
                                                 slowHeal(healTimeout);
                                             }
                                         } else if ([undefined || 15].includes(near.secondaryIndex)) {
                                             if (damaged > (includeSpikeDmgs ? 8 : 20) && player.damageThreat >= 25 && game.tick - player.antiTimer > 1) {
                                                 if (tmpObj.shameCount < 5) {
-                                                    healer();
+                                                    HealC.healer();
                                                 } else {
                                                     slowHeal(healTimeout);
                                                 }
@@ -8357,12 +8175,12 @@ function updatePlayers(data) {
                                             }
                                         } else if ([9, 12, 13].includes(near.secondaryIndex)) {
                                             if (dmg >= 25 && player.damageThreat + dmg >= 70 && tmpObj.shameCount < 6) {
-                                                healer();
+                                                HealC.healer();
                                             } else {
                                                 slowHeal(healTimeout);
                                             }
                                         } else if (damaged > 25 && player.damageThreat + dmg >= 95) {
-                                            healer();
+                                            HealC.healer();
                                         } else {
                                             slowHeal(healTimeout);
                                         }
@@ -8370,12 +8188,12 @@ function updatePlayers(data) {
                                     if (near.primaryIndex == 6) {
                                         if (near.secondaryIndex == 15) {
                                             if (damaged >= 25 && tmpObj.damageThreat + dmg >= 95 && tmpObj.shameCount < 4) {
-                                                healer();
+                                                HealC.healer();
                                             } else {
                                                 slowHeal(healTimeout);
                                             }
                                         } else if (damaged >= 70 && tmpObj.shameCount < 4) {
-                                            healer();
+                                            HealC.healer();
                                         } else {
                                             slowHeal(healTimeout);
                                         }
@@ -8384,7 +8202,7 @@ function updatePlayers(data) {
                                         instaC.canCounter = true;
                                     }
                                 } else if (damaged >= 70) {
-                                    healer();
+                                    HealC.healer();
                                 } else {
                                     slowHeal(healTimeout);
                                 }
@@ -8398,7 +8216,7 @@ function updatePlayers(data) {
                                     tmpObj.antiTimer = game.tick;
                                     let shame = [0, 4, 6, 7, 8].includes(near.primaryIndex) ? 2 : 5;
                                     if (tmpObj.shameCount < shame) {
-                                        healer();
+                                        HealC.healer();
                                     } else if (near.primaryIndex == 7 || player.weapons[0] == 7 && (near.skinIndex == 11 || near.tailIndex == 21)) {
                                         slowHeal(healTimeout);
                                     } else {
@@ -8431,7 +8249,7 @@ function updatePlayers(data) {
                             }
                         }
                         if (inGame) {
-                            let attackers = getAttacker(damaged);
+                            let attackers = HealC.getAttacker(damaged);
                             let gearDmgs = [0.25, 0.45].map(
                                 (val) =>
                                 val * items.weapons[player.weapons[0]].dmg * soldierMult()
@@ -8448,15 +8266,15 @@ function updatePlayers(data) {
                             ];
                             let slowHeal = function(timer, tickBase) {
                                 if (!tickBase) {
-                                    setTimeout(() => healer(), timer);
+                                    setTimeout(() => HealC.healer(), timer);
                                 } else {
-                                    game.tickBase(() => healer(), 2);
+                                    game.tickBase(() => HealC.healer(), 2);
                                 }
                             };
                             if (true) {
                                 let canHealFast = [0, 7, 8].includes(near.primaryIndex) ? damaged < 75 : [1, 2, 6].includes(near.primaryIndex) ? damaged >= 25 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 5 : [undefined, 5].includes(near.primaryIndex) ? dmg >= (includeSpikeDmgs ? 15 : 20) && tmpObj.damageThreat + dmg >= 50 && tmpObj.shameCount < 6 : near.primaryIndex == 3 && near.secondaryIndex == 15 ? damaged >= 35 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 5 && game.tick - player.antiTimer > 1 : near.primaryIndex == 4 ? near.primaryVariant >= 1 ? damaged >= 10 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 4 : damaged >= 35 && player.damageThreat + dmg >= 95 && tmpObj.shameCount < 3 : near.primaryIndex == 6 && near.secondaryIndex == 15 ? damaged >= 25 && tmpObj.damageThreat + dmg >= 95 && tmpObj.shameCount < 4 : damaged >= 25 && player.damageThreat + dmg >= 95;
                                 if (canHealFast) {
-                                    healer();
+                                    HealC.healer();
                                 } else {
                                     slowHeal(healTimeout);
                                 }
@@ -8470,7 +8288,7 @@ function updatePlayers(data) {
                                     }
                                     tmpObj.antiTimer = game.tick;
                                     if (tmpObj.shameCount < shameCountThreshold) {
-                                        healer();
+                                        HealC.healer();
                                     } else {
                                         slowHeal(healTimeout, near.primaryIndex == 7 || player.weapons[0] == 7 && (near.skinIndex == 11 || near.tailIndex == 21) ? 0 : 1);
                                     }
@@ -8663,7 +8481,7 @@ function updatePlayers(data) {
             }
             if (game.tick % 1 == 0) {
                 if (mills.place) {
-                    plcAng = 1.4;
+                    plcAng = 1.25;
                     for (let i = -plcAng; i <= plcAng; i += plcAng) {
                         checkPlace(3, UTILS.getDirect(player.oldPos, player, 2, 2) + i);
                     }
@@ -9231,8 +9049,8 @@ function gatherAnimation(sid, didHit, index) {
         tmpObj.gatherIndex = index;
         tmpObj.gathering = 1;
 
-        if(player.damageThreat >= 100 && cdf(player, tmpObj) <= 300) {
-           healer();
+        if (player.damageThreat >= 100 && cdf(player, tmpObj) <= 300) {
+           HealC.healer();
         }
 
         if (didHit) {
@@ -9258,7 +9076,7 @@ function gatherAnimation(sid, didHit, index) {
 }
 if(nears.filter(near => near.gathering).length>1) {
     sendChat("pSyD");
-    healer();
+    HealC.healer();
 }
 
 
@@ -9422,7 +9240,7 @@ function updateNotifications() {
         });
         UTILS.generateElement({
             class: "notifButton",
-            html: "<i class='material-icons' style='font-size:28px;color:#cc5151;'>&#xE14C;</i>",
+            html: "<i class='material-icons' style='font-size:28px;color:#ff1e56;'>&#xE14C;</i>",
             parent: noticationDisplay,
             onclick: function() {
                 aJoinReq(0);
@@ -9431,7 +9249,7 @@ function updateNotifications() {
         });
         UTILS.generateElement({
             class: "notifButton",
-            html: "<i class='material-icons' style='font-size:28px;color:#8ecc51;'>&#xE876;</i>",
+            html: "<i class='material-icons' style='font-size:28px;color:#00d68e;'>&#xE876;</i>",
             parent: noticationDisplay,
             onclick: function() {
                 aJoinReq(1);
@@ -10548,6 +10366,7 @@ function getResSprite(obj) {
 
 // CUSTOM BUILDING VISUALS:
 let itemSprites = [];
+
 function getItemSprite(obj, asIcon) {
     let tmpSprite = itemSprites[obj.id];
     if (!tmpSprite || asIcon) {
@@ -10555,7 +10374,6 @@ function getItemSprite(obj, asIcon) {
         let tmpCanvas = document.createElement("canvas");
         let reScale = ((!asIcon && obj.name == "windmill") ? items.list[4].scale : obj.scale);
         tmpCanvas.width = tmpCanvas.height = (reScale * 2.5) + outlineWidth + (items.list[obj.id].spritePadding || 0) + blurScale;
-
         let tmpContext = tmpCanvas.getContext("2d");
         tmpContext.translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
         tmpContext.rotate(asIcon ? 0 : (Math.PI / 2));
@@ -10565,15 +10383,13 @@ function getItemSprite(obj, asIcon) {
             tmpContext.shadowBlur = 15;
             tmpContext.shadowColor = `rgba(0, 0, 0, 0.2)`;
         }
-
         if (obj.name == "apple") {
             tmpContext.globalAlpha = 0.5;
             tmpContext.fillStyle = "#ff7161";
             renderCircle(0, 0, obj.scale, tmpContext);
             tmpContext.fillStyle = "#425e43";
             let leafDir = -(Math.PI / 2);
-            renderLeaf(obj.scale * Math.cos(leafDir), obj.scale * Math.sin(leafDir),
-                       25, leafDir + Math.PI / 2, tmpContext);
+            renderLeaf(obj.scale * Math.cos(leafDir), obj.scale * Math.sin(leafDir), 25, leafDir + Math.PI / 2, tmpContext);
         } else if (obj.name == "cookie") {
             tmpContext.globalAlpha = 0.5;
             tmpContext.fillStyle = "#543526";
@@ -10584,8 +10400,7 @@ function getItemSprite(obj, asIcon) {
             let tmpRange;
             for (let i = 0; i < chips; ++i) {
                 tmpRange = UTILS.randInt(obj.scale / 2.5, obj.scale / 1.7);
-                renderCircle(tmpRange * Math.cos(rotVal * i), tmpRange * Math.sin(rotVal * i),
-                             UTILS.randInt(4, 5), tmpContext, true);
+                renderCircle(tmpRange * Math.cos(rotVal * i), tmpRange * Math.sin(rotVal * i), UTILS.randInt(4, 5), tmpContext, true);
             }
         } else if (obj.name == "cheese") {
             tmpContext.globalAlpha = 0.5;
@@ -10597,25 +10412,21 @@ function getItemSprite(obj, asIcon) {
             let tmpRange;
             for (let i = 0; i < chips; ++i) {
                 tmpRange = UTILS.randInt(obj.scale / 2.5, obj.scale / 1.7);
-                renderCircle(tmpRange * Math.cos(rotVal * i), tmpRange * Math.sin(rotVal * i),
-                             UTILS.randInt(4, 5), tmpContext, true);
+                renderCircle(tmpRange * Math.cos(rotVal * i), tmpRange * Math.sin(rotVal * i), UTILS.randInt(4, 5), tmpContext, true);
             }
         } else if (obj.name == "wood wall" || obj.name == "stone wall" || obj.name == "castle wall") {
             tmpContext.globalAlpha = 0.5;
-            tmpContext.fillStyle = (obj.name == "castle wall") ? "#3a434a" : (obj.name == "wood wall") ?
-                "#877d49" : "#858282";
+            tmpContext.fillStyle = (obj.name == "castle wall") ? "#3a434a" : (obj.name == "wood wall") ? "#877d49" : "#858282";
             let sides = (obj.name == "castle wall") ? 4 : 3;
             renderStar(tmpContext, sides, obj.scale * 1.1, obj.scale * 1.1);
             tmpContext.fill();
             tmpContext.stroke();
-            tmpContext.fillStyle = (obj.name == "castle wall") ? "#9da4aa" : (obj.name == "wood wall") ?
-                "#c9b758" : "#545454";
+            tmpContext.fillStyle = (obj.name == "castle wall") ? "#9da4aa" : (obj.name == "wood wall") ? "#c9b758" : "#545454";
             renderStar(tmpContext, sides, obj.scale * 0.65, obj.scale * 0.65);
             tmpContext.fill();
-        } else if (obj.name == "spikes" || obj.name == "greater spikes" || obj.name == "poison spikes" ||
-                   obj.name == "spinning spikes") {
+        } else if (obj.name == "spikes" || obj.name == "greater spikes" || obj.name == "poison spikes" || obj.name == "spinning spikes") {
             tmpContext.globalAlpha = 0.5;
-            tmpContext.fillStyle = (obj.name == "poison spikes")?"#7b935d":"#a7c7b7";
+            tmpContext.fillStyle = (obj.name == "poison spikes") ? "#405e0f" : "#a7c7b7";
             let tmpScale = (obj.scale * 0.6);
             renderStar(tmpContext, (obj.name == "spikes") ? 5 : 6, obj.scale, tmpScale);
             tmpContext.fill();
@@ -10655,13 +10466,35 @@ function getItemSprite(obj, asIcon) {
             renderStar(tmpContext, 3, obj.scale * 0.55, obj.scale * 0.65);
             tmpContext.fill();
         } else if (obj.name == "sapling") {
-            tmpContext.globalAlpha = 0.5;
-            for (let i = 0; i < 2; ++i) {
-                let tmpScale = obj.scale * (!i ? 1 : 0.5);
-                renderStar(tmpContext, 7, tmpScale, tmpScale * 0.7);
-                tmpContext.fillStyle = (!i ? "#9ebf57" : "#b4db62");
-                tmpContext.fill();
-                if (!i) tmpContext.stroke();
+            let blurScale = 15;
+            let treecolors = [
+                ["#ffaa00", "#ff8000"], // auturn
+                ["#ffb7c5", "#ff87c5"], // cherry blossom
+                ["#ffeb8f", "#ffdc3d"], // sacred tree(from mini world creata)
+                ["#b4db62", "#9ebf57"], // moomoo.io tree
+                ["#abbb7b", "#475029"], // fringe tree
+                ["#d98c4e", "#873e1d"], // maple tree
+                ["#ebc6f3", "#cf79e2"], // wisteria tree
+                ["#e7e7a0", "#c1b785"], // Laurelin
+            ];
+            let selectTreeColors = treecolors[Math.floor(Math.random() * treecolors.length)];
+            let tmpCanvas = document.createElement("canvas");
+            tmpCanvas.width = tmpCanvas.height = (obj.scale * 2.1) + outlineWidth;
+            let tmpContext = tmpCanvas.getContext('2d');
+            tmpContext.translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
+            tmpContext.rotate(UTILS.randFloat(0, Math.PI));
+            tmpContext.strokeStyle = outlineColor;
+            tmpContext.lineWidth = outlineWidth;
+            if (obj.type == 0) {
+                var tmpScale;
+                for (var i = 0; i < 2; ++i) {
+                    tmpScale = tmpObj.scale * (!i ? 1 : 0.5);
+                    renderBlob(tmpContext, 7, tmpScale, tmpScale * 0.7);
+                    tmpContext.fillStyle = !isSnowBiome ? !i ? selectTreeColors[1] : selectTreeColors[0] : !i ? "#2d7254" : "#245b43"; //evergreen tree
+                    tmpContext.fill();
+                    if (!i);
+                    tmpContext.stroke();
+                }
             }
         } else if (obj.name == "pit trap") {
             tmpContext.globalAlpha = 1;
@@ -10750,8 +10583,7 @@ function getItemSprite(obj, asIcon) {
             renderCircle(0, 0, obj.scale * 0.5, tmpContext, true);
         }
         tmpSprite = tmpCanvas;
-        if (!asIcon)
-            itemSprites[obj.id] = tmpSprite;
+        if (!asIcon) itemSprites[obj.id] = tmpSprite;
     }
     return tmpSprite;
 }
