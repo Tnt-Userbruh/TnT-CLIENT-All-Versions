@@ -1,7 +1,7 @@
 # TπT CLIENT All Versions
 A fking op mod used to destroy ppl, now in chronical order
 
-<img width="880" height="207" alt="image" src="https://github.com/user-attachments/assets/2fea4928-c404-4c19-9e5f-47a1a3e6d5c6" />
+<img width="360" height="360" alt="image" src="https://github.com/user-attachments/assets/5503482a-0053-4928-8adb-27349b0a8792" />
 
 # Macros
 ## beta - 1.0:
