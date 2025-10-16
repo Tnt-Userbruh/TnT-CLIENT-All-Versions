@@ -12,6 +12,7 @@
 // @license         MIT
 // @require         https://cdn.jsdelivr.net/npm/msgpack-lite@0.1.26/dist/msgpack.min.js
 // @require         https://cdn.jsdelivr.net/npm/fontfaceobserver@2.1.0/fontfaceobserver.standalone.min.js
+// @homepageURL     https://tntubruh.neocities.org/
 // ==/UserScript==
 
 /*
@@ -5383,10 +5384,10 @@ class Healing {
             let delay = 20;
             if (!isHealing && player.health < 100) {
                 isHealing = true;
-                if (player.health < 95) {
+                if (player.health < 80) {
                     place(0, getAttackDir());
                     HealC.fastHealing(1000); // fast heal
-                    panicHeal();
+                    HealC.panicHeal();
                     isHealing = false;
                 } else {
                     const healingDelay = 5;
@@ -5405,6 +5406,13 @@ class Healing {
                         }
                     }
                     performHealing();
+                }
+                if (player.shameCount > 5) {
+                    buyEquip(7, 0);
+                    doAutoQ();
+                    buyEquip(21, 0);
+                    HealC.panicHeal();
+                    buyEquip(6, 0);
                 }
             }
         }
@@ -6749,7 +6757,7 @@ mals.addEventListener("wheel", wheel, false);
 
 function wheel(e) {
     if(player.shameCount > 1 && settingFunctions.antiShame) {
-        panicHeal();
+        HealC.Staryheal();
         doAutoQ();
         buyEquip(7, 0);
     } else {
