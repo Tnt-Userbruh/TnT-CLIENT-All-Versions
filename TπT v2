@@ -290,6 +290,21 @@ const msgpackLite = window.msgpack;
 const NativeWebSocket = window.WebSocket;
 let mainSocket;
 
+// 2 configs for utils to work
+let cfg = window.config || {};
+let config = window.config || {};
+
+// VOLCANO:
+cfg.volcanoScale = 320;
+cfg.innerVolcanoScale = 100;
+cfg.volcanoAnimalStrength = 2;
+cfg.volcanoAnimationDuration = 3200;
+cfg.volcanoAggressionRadius = 1440;
+cfg.volcanoAggressionPercentage = 0.2;
+cfg.volcanoDamagePerSecond = -1;
+cfg.volcanoLocationX = 14400 - 440;
+cfg.volcanoLocationY = 14400 - 440;
+
 window.captchaCallbackHook = function() {
     hr = true;
 };
@@ -297,8 +312,7 @@ if (window.captchaCallbackComplete) {
     window.captchaCallbackHook();
 }
 
-let cha = document.getElementById('altcha');
-cha.style.display = "none";
+let cha = document.getElementById("altcha")
 let altchek = document.getElementById('altcha_checkbox');
 let enterGame = document.getElementById("enterGame");
 enterGame.innerHTML = "⇏ ‍  ‍  ‍Enter Game ‍ ‍   ‍⇍";
@@ -312,12 +326,8 @@ document.getElementById("enterGame").addEventListener("mouseleave", function() {
 function sd(e) {
     var t;
     if (((t = e == null ? undefined : e.detail) == null ? undefined : t.state) === "verified") {
-        Ei = e.detail.payload;
-        if (enterGame && enterGame instanceof HTMLElement) {
-            enterGame.classList.remove("disabled");
-        } else {
-            console.error("NO FUCKING WAY YOU JUST DELETED THE let enterGame");
-        }
+        Ei = e.detail.payload, document.getElementById("altcha").remove();
+        enterGame.classList.remove("disabled");
     }
 }
 
@@ -344,7 +354,15 @@ let autoPlaceInterval = 150; // in ms — adjust as needed
 let player;
 let playerSID;
 let tmpObj;
-
+let xof = undefined;
+let yof = undefined;
+let volcano = {
+    animationTime: 0,
+    land: null,
+    lava: null,
+    x: cfg.volcanoLocationX,
+    y: cfg.volcanoLocationY
+};
 let allChats = [];
 let ais = [];
 let players = [];
@@ -393,9 +411,6 @@ function removeEl(elementId) {
 }
 removeEl("#pre-content-container");
 removeEl("joinPartyButton");
-removeEl("woodDisplay");
-removeEl("foodDisplay");
-removeEl("stoneDisplay");
 removeEl("partyButton");
 removeEl("settingsButton");
 removeEl("leaderboardButton");
@@ -425,10 +440,6 @@ document.title = "MOOMOO.io";
         document.head.appendChild(link);
     });
 })();
-
-// 2 configs for utils to work
-let cfg = window.config || {};
-let config = window.config || {};
 
 window.setTimeout(function() {
     window.onbeforeunload = null;
@@ -479,17 +490,6 @@ cfg.weaponVariants = [{
     xp: 24000,
     val: 1.18,
 }];
-
-// VOLCANO:
-cfg.volcanoScale = 320;
-cfg.innerVolcanoScale = 100;
-cfg.volcanoAnimalStrength = 2;
-cfg.volcanoAnimationDuration = 3200;
-cfg.volcanoAggressionRadius = 1440;
-cfg.volcanoAggressionPercentage = 0.2;
-cfg.volcanoDamagePerSecond = -1;
-cfg.volcanoLocationX = 14400 - 440;
-cfg.volcanoLocationY = 14400 - 440;
 
 // USELESS SHITS: (will removed in future versions)
 cfg.anotherVisual = true;
@@ -1574,7 +1574,8 @@ function updateInnerHTML() {
                 float: left;
                 font-family: "Inter", sans-serif;
                 margin-top: 5px;
-                color: #ffa700;
+                color: #00fff4;
+                text-shadow: 0 0 7px #00f9fc, 0 0 7px #88feff;
                 width: auto;
                 height: auto;
                 font-size: 23.4px;
@@ -6522,12 +6523,6 @@ let instaC = new Instas();
 let autoBuy = new Autobuy([40, 6, 7, 22, 53, 15, 31], [11, 21, 18, 13]);
 let autoUpgrade = new Autoupgrade();
 
-let lastDeath;
-let minimapData;
-let mapMarker = {};
-let mapPings = [];
-let tmpPing;
-
 let antiinsta = true;
 let antiinsta1 = false;
 
@@ -6753,27 +6748,13 @@ function mouseUp(e) {
 mals.addEventListener("wheel", wheel, false);
 
 function wheel(e) {
-    if(player.shameCount > 1 && settingFunctions.antiShame) {
+    if (player.shameCount > 1 && settingFunctions.antiShame) {
         HealC.Staryheal();
         doAutoQ();
         buyEquip(7, 0);
-    } else {
-        buyEquip(6, 0);
     }
 }
 
-let keys = {};
-let moveKeys = {
-    87: [0, -1],
-    38: [0, -1],
-    83: [0, 1],
-    40: [0, 1],
-    65: [-1, 0],
-    37: [-1, 0],
-    68: [1, 0],
-    39: [1, 0],
-};
-let macro = {};
 // INPUT UTILS:
 function getMoveDir() {
     let dx = 0;
@@ -6911,11 +6892,21 @@ function getVisualDir() {
 }
 
 // KEYS:
+let keys = {};
+let moveKeys = {
+    87: [0, -1],
+    38: [0, -1],
+    83: [0, 1],
+    40: [0, 1],
+    65: [-1, 0],
+    37: [-1, 0],
+    68: [1, 0],
+    39: [1, 0],
+};
+let macro = {};
 function keysActive() {
-    return (allianceMenu.style.display != "block" &&
-            chatHolder.style.display != "block");
+    return (allianceMenu.style.display != "block" && chatHolder.style.display != "block");
 }
-
 let msgistoggled = false
 
 function keyDown(event) {
@@ -6989,19 +6980,19 @@ function keyUp(event) {
 }
 addEventListener('keyup',  UTILS.checkTrusted(keyUp));
 
-    // is linked to !instac
-    let toggleMessages = ["Death", "I'm Osama!"];
-    let toggleIndex = 0;
-    document.addEventListener("keydown", function(event) {
-        if (event.repeat) return;
-        if (event.key === "t" && document.activeElement.id.toLowerCase() !== "chatbox") {
-            safeSendChat(toggleMessages[toggleIndex]);
-            toggleIndex = (toggleIndex + 1) % toggleMessages.length;
-            msgistoggled = true;
-            instaC.wait = !instaC.wait;
-            dontSend = true;
-        }
-    });
+// is linked to !instac
+let toggleMessages = ["Death", "I'm Osama!"];
+let toggleIndex = 0;
+document.addEventListener("keydown", function(event) {
+    if (event.repeat) return;
+    if (event.key === "t" && document.activeElement.id.toLowerCase() !== "chatbox") {
+        safeSendChat(toggleMessages[toggleIndex]);
+        toggleIndex = (toggleIndex + 1) % toggleMessages.length;
+        msgistoggled = true;
+        instaC.wait = !instaC.wait;
+        dontSend = true;
+    }
+});
 
 function doOneFrame() {
     if (near.dist2 <= items.weapons[player.weapons[0]].range + (player.scale * 1.8) && near.skinIndex != 6) {
@@ -7886,60 +7877,6 @@ function updatePlayers(data) {
                         HealC.healer();
                     }
                 }
-                if (tmpObj == player) {
-                    if (liztobj.length) {
-                        dodgeObjects();
-                        var spike = liztobj.filter(tmp => tmp.dmg && tmp.active && !tmp.isTeamObject(player) && UTILS.getDist(tmp, player, 0, 3) < (tmp.scale + 40 + player.scale)).sort(function(a, b) {
-                            return UTILS.getDist(a, player, 0, 5) - UTILS.getDist(b, player, 0, 5);
-                        })[0];
-                        let distToSpike = items.weapons[tmpObj.weaponIndex].range;
-                        if (settingFunctions.autoBreakSpike && spike && UTILS.getDist(spike, player, 0, 2) <= distToSpike + spike.scale + player.scale) {
-                            breakObject.info = spike;
-                            breakObject.aim = UTILS.getDirect(spike, player, 0, 2);
-                            breakObject.active = true;
-                        } else {
-                            breakObject.active = false;
-                            breakObject.info = {};
-                        }
-                        let nearTrap = liztobj.filter(e => e.trap && e.active && UTILS.getDist(e, tmpObj, 0, 2) <= (tmpObj.scale + e.getScale() + 25) && !e.isTeamObject(tmpObj)).sort(function(a, b) {
-                            return UTILS.getDist(a, tmpObj, 0, 2) - UTILS.getDist(b, tmpObj, 0, 2);
-                        })[0];
-                        if (nearTrap) {
-                            let spike = liztobj.filter( // real real no skid
-                                (obj) => obj.dmg && cdf(tmpObj, obj) <= tmpObj.scale + nearTrap.scale / 2 && !obj.isTeamObject(tmpObj) && obj.active)[0];
-                            traps.outOfTrap = false;
-                            traps.dist = UTILS.getDist(spike ? spike : nearTrap, tmpObj, 0, 2);
-                            traps.aim = UTILS.getDirect(spike ? spike : nearTrap, tmpObj, 0, 2);
-                            if (!traps.inTrap && enemy.length) {
-                                let simpleAim = UTILS.getDirect(nearTrap, tmpObj, 0, 2);
-                                traps.protect(simpleAim);
-                            }
-                            traps.inTrap = true;
-                            traps.info = nearTrap;
-                        }
-                        let checkNigers = enemy.length && near.dist2 <= 300;
-                        if (traps.inTrap && checkNigers) {
-                            traps.outOfTrap = true;
-                            my.anti0Tick = 2;
-                            HealC.healer();
-                            if (player.health < 45) Staryheal();
-                        } else traps.outOfTrap = false;
-                        traps.inTrap = false;
-                        traps.info = {};
-                    }
-                } else {
-                    let checkNigers = enemy.length && near.dist2 <= 300;
-                    if (traps.inTrap && checkNigers) {
-                        sendChat("EAT KEBAB");
-                        traps.outOfTrap = true;
-                        my.anti0Tick = 2;
-                        HealC.healer();
-                        if (player.health < 45) HealC.healer();
-                    } else {
-                        traps.outOfTrap = false;
-                        traps.inTrap = false;
-                    }
-                }
             }
             if (tmpObj.weaponIndex < 9) {
                 tmpObj.primaryIndex = tmpObj.weaponIndex;
@@ -8486,7 +8423,7 @@ function updatePlayers(data) {
             }
             if (game.tick % 1 == 0) {
                 if (mills.place) {
-                    plcAng = 1.25;
+                    plcAng = player.items[4] == 16 ? 1.4 : 1.20427718;
                     for (let i = -plcAng; i <= plcAng; i += plcAng) {
                         checkPlace(3, UTILS.getDirect(player.oldPos, player, 2, 2) + i);
                     }
@@ -10412,8 +10349,8 @@ function createVolcano() {
 createVolcano();
 
 function renderVolcano() {
-    let XOffset = xof
-    let YOffset = yof
+    var XOffset = xof;
+    var YOffset = yof;
     volcano.animationTime += delta;
     volcano.animationTime %= cfg.volcanoAnimationDuration;
     let halfAnimationDuration = cfg.volcanoAnimationDuration / 2;
@@ -10621,7 +10558,7 @@ function getItemSprite(obj, asIcon) {
             tmpContext.fill();
             tmpContext.stroke();
             tmpContext.fillStyle = "#00f7ff";
-            renderTriangle(0, 2, obj.scale * 1, tmpContext);
+            renderTriangle(0, 0, obj.scale * 1, tmpContext);
         } else if (obj.name == "blocker") {
             tmpContext.globalAlpha = 0.5;
             tmpContext.fillStyle = "#a66c83";
@@ -10885,6 +10822,11 @@ function markObject(tmpObj, tmpX, tmpY) {
 }
 
 // RENDER MINIMAP:
+let lastDeath;
+let minimapData;
+let mapMarker = {};
+let mapPings = [];
+let tmpPing;
 class MapPing {
     constructor(color, scale) {
         this.init = function(x, y) {
@@ -11613,7 +11555,7 @@ body {
     pointer-events: none;
     user-select: none;
     padding: 93px;
-    text-shadow: 0px 0px 10px #61fcff, 0px 0px 18px #24fbff, 0px 0px 40px #00fbff;
+    text-shadow: 0px 0px 10px #ffffff, 0px 0px 18px #24fbff, 0px 0px 40px #00fbff;
     color: #a4feff73;
 }
 
@@ -11691,9 +11633,28 @@ body {
     border-radius: 15px;
 }
 
-#scoreDisplay {
+/* % RESOURCE DISPLAYS % */
+#foodDisplay {
+    background-color: #fb6565;
     border-radius: 15px;
-    background-color: rgb(208 128 0 / 41%);
+    text-shadow: 0 0 4px white;
+}
+
+#woodDisplay {
+    background-color: #669f45;
+    border-radius: 15px;
+    text-shadow: 0 0 4px white;
+}
+
+#stoneDisplay {
+    background-color: #a0a0a0;
+    border-radius: 15px;
+    text-shadow: 0 0 4px white;
+}
+
+#scoreDisplay {
+    background-color: #cdbb45;
+    border-radius: 15px;
     text-shadow: 0 0 4px white;
 }
 
@@ -11806,14 +11767,7 @@ document.head.appendChild(newFavicon);
 let greetings = false;
 
 function getGreeting() {
-    const hour = new Date().getHours();
-    if (hour < 12) {
-        return "Good Morning!";
-    } else if (hour < 18) {
-        return "Good Afternoon!";
-    } else if (hour > 18) {
-        return "Good Evening!";
-    }
+    return "Welcome To ShangHai!";
 }
 
 function greeting() {
