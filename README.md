@@ -24,16 +24,7 @@ M = spawn pad
 N = mill
 Z = 3-mill
 
-# Includes:
-- OP INSTA?
-- Good heal(idk if u die to other mod insta a lot)
-- OP Anti Shame
-- Autochat
-- OP AutoPlace
-- Reused some functions from old mods into here
-- BEST AUTOGRIND OF 2025 MODS
-
-## If you spotted some bugs or want us to add more functions feel free to contact our discord server's TnT CLIENT channel
+## NOTE: TπT CLIENT IS CURRENTLY DISCONTINUED. NO MORE UPDATES ON THE MOD WILL BE RELEASED OR DEVELOPED.
 https://discord.com/invite/5FrkNqkvPz
 # CREDITS:
 - tntubruh777 (TnT_Userbruh)
