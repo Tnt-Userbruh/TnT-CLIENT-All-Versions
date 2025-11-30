@@ -567,6 +567,8 @@ let breakObjects = [];
 let enemy = [];
 let nears = [];
 let near = [];
+let telerstop = []
+let spikerstop = []
 let ticks = {
     tick: 0,
     delay: 0,
@@ -2403,21 +2405,21 @@ document.addEventListener("keydown", event => {
     } else if (event.key === "Control" && !chatistoggling && inGame) {
         chatistoggling = true;
         if (!chatToggled) {
-            menu.style.display = "block";
+            menuChats.style.display = "block";
             backgroundEffect.style.display = "block";
-            menu.offsetHeight;
+            menuChats.offsetHeight;
             setTimeout(() => {
-                menu.style.transform = "translateY(0) scale(1)";
-                menu.style.opacity = "1";
+                menuChats.style.transform = "translateY(0) scale(1)";
+                menuChats.style.opacity = "1";
                 chatToggled = true;
                 chatistoggling = false;
                 gameUI.style.display = "none";
                 getEl("menuContainer").style.display = "none";
             }, 10);
         } else {
-            menu.style.transform = "translateY(-20px) scale(0.95)";
-            menu.style.opacity = "0";
-            menu.style.display = "none";
+            menuChats.style.transform = "translateY(-20px) scale(0.95)";
+            menuChats.style.opacity = "0";
+            menuChats.style.display = "none";
             setTimeout(() => {
                 backgroundEffect.style.display = "none";
                 chatToggled = false;
@@ -7378,7 +7380,6 @@ function TrapDir() {
 }
 
 function SpikeDir() {
-    let spike;
     if ((near.dist2 > 250 || !enemy.length) && config.autobot && !my.autoPush && enemy.length) {
         if (traps.inTrap) {
             spike = gameObjects.filter(tmp => tmp.dmg && tmp.active && !tmp.isTeamObject(player) && UTILS.getDist(tmp, player, 0, 3) < (items.weapons[player.weapons[0]].range + player.scale * 1.5)).sort(function(a, b) {
@@ -8187,8 +8188,6 @@ let waitTicks = [];
 let placeableSpikes = [];
 let placeableTraps = [];
 let placeableSpikesPREDICTS = [];
-var spike = gameObjects.filter(obj => (obj.name == "spikes" || obj.name == "greater spikes" || obj.name == "spinning spikes" || obj.name == "poison spikes") && fgdo(player, obj) < player.scale + obj.scale + 22 && !obj.isTeamObject(tmpObj) && obj.active)[0]
-
 let reset = false
 function fgdo(a, b) {
     return Math.sqrt(Math.pow((b.y - a.y), 2) + Math.pow((b.x - a.x), 2));
@@ -8305,54 +8304,6 @@ function showSettingText(life, setting, color) {
 
 let gp = [];
 let movementDirs = [];
-function handleMovement(final = false) {
-    if (traps.inTrap || !modConfigs.safeFalk) return;
-
-    if (final) {
-        if (!movementDirs.length) return move(lastMoveDir);
-
-        let firstMove = movementDirs.sort((a, b) => b.score - a.score)[0];
-        if (firstMove.reset) {
-            io.send("e");
-        } else move(firstMove.dir);
-
-        movementDirs.length = 0;
-    } else {
-        const speed = player.maxSpeed;
-        const weapon = items.weapons[player.weapons[player.weapons[1] == 10 ? 1 : 0]];
-        const weapRange = weapon.range;
-        let newPos = {
-            x: player.x2 + (player.x2 - player.oldPos.x2) * speed + (Math.cos(lastMoveDir) * (player.scale / 2) * speed),
-            y: player.y2 + (player.y2 - player.oldPos.y2) * speed + (Math.sin(lastMoveDir) * (player.scale / 2) * speed),
-        };
-
-        if (spike) {
-            for (let i = liztobj.length; i--;) {
-                const SCOPE = liztobj[i];
-                const val = (SCOPE.getScale(0.6, false) / 2) + weapRange + (player.scale / 2);
-
-                if (UTILS.collisionDetection(newPos, spike, val) && UTILS.getDist(player, spike, 2, 0) >= UTILS.getDist(spike, newPos, 0, 0)) {
-                    showSettingText(1000, "AntiPush", "#bb00ff");
-
-                    movementDirs.push({
-                        reset: true,
-                        dir: undefined,
-                        score: 3,
-                        object: spike,
-                    });
-                    break;
-                };
-            }
-        }
-    }
-};
-
-function dodgeObjects() {
-    game.tickBase(() => {
-        handleMovement();
-        handleMovement(1);
-    }, 1);
-}
 
 let breakObject = {
     info: {},
@@ -8422,7 +8373,6 @@ function updatePlayers(data) {
             }
             if (tmpObj == player) {
                 if (liztobj.length) {
-                    dodgeObjects();
                     liztobj.forEach((tmp) => {
                         tmp.onNear = false;
                         if (tmp.active) {
@@ -8936,6 +8886,42 @@ function updatePlayers(data) {
                 cantWearTankGear = false;
                 cantWearBullHat = false;
             }
+            async function antiSpikeTickop() {
+                const thinga = near.dist2 <= 300 && [3, 4, 5].includes(near.primaryIndex) && traps.info.health <= items.weapons[near.weaponIndex].dmg * (config.weaponVariants[near[(near.weaponIndex < 9 ? "prima" : "seconda") + "ryVariant"]].val) * (items.weapons[near.weaponIndex].sDmg || 1) * 3.3;
+                const thingaa = near.dist2 <= 300 && [3, 4, 5].includes(near.primaryIndex) && traps.info.health <= items.weapons[player.weaponIndex].dmg * (config.weaponVariants[player[(player.weaponIndex < 9 ? "prima" : "seconda") + "ryVariant"]].val);
+                if ([5].includes(near.primaryIndex) && near.dist2 <= 300 && traps.inTrap) {
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                    if ([0].includes(near.secondaryIndex) && traps.inTrap) {
+                        dothing = true;
+                        my.anti0Tick = 2;
+                        if (my.reSync) {
+                            my.reSync = true;
+                        }
+                    }
+                }
+                if (traps.inTrap && thingaa && thinga) {
+                    buyEquip(6, 0);
+                    buyEquip(16, 1);
+                    dothing = true;
+                    if (my.reSync) {
+                        my.reSync = false;
+                    }
+                    if ([5, 4, 3].includes(near.primaryIndex)) {
+                        if (traps.inTrap) {
+                            while (traps.inTrap) {
+                                await new Promise(resolve => setTimeout(resolve, 10));
+                                if (!traps.inTrap) {
+                                    my.anti0Tick = 2;
+                                    dothing = true;
+                                    if (my.reSync) {
+                                        my.reSync = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (traps.inTrap && near.dist2 <= 200) {
                 antiSpikeTickop();
             }
@@ -9014,9 +9000,7 @@ function updatePlayers(data) {
             macro.y && place(5, getSafeDir());
             macro.h && place(player.getItemType(22), getSafeDir());
             macro.n && place(3, getSafeDir());
-            if (!macro.q && !macro.f && !macro.v && !macro.h && !macro.n) {
-                packet("D", getAttackDir());
-            }
+
             function chooseRandomWindmillType() {
                 const options = [1.2828283922, 1.133232455373737775];
                 const randomIndex = Math.floor(Math.random() * options.length);
@@ -9103,11 +9087,6 @@ function updatePlayers(data) {
                     }
                 }
             }
-            if (macro.t && !traps.inTrap) {
-                if (!instaC.isTrue && player.reloads[player.weapons[0]] == 0 && (player.weapons[1] == 15 ? (player.reloads[player.weapons[1]] == 0) : true) && (player.weapons[0] == 5 || (player.weapons[0] == 4 && player.weapons[1] == 15))) {
-                    instaC[(player.weapons[0] == 4 && player.weapons[1] == 15) ? "kmTickMovement" : "tickMovement"]();
-                }
-            }
             if (macro["."] && !traps.inTrap) {
                 if (!instaC.isTrue && player.reloads[player.weapons[0]] == 0 && ([9, 12, 13, 15].includes(player.weapons[1]) ? (player.reloads[player.weapons[1]] == 0) : true)) {
                     instaC.boostTickMovement();
@@ -9157,6 +9136,55 @@ function updatePlayers(data) {
             }
             if (!macro.q && !macro.f && !macro.v && !macro.h && !macro.n) {
                 packet("D", getAttackDir());
+            }
+            if (modConfigs.safeFalk) {
+                let nearSpike = spike;
+                let nearTp = telep;
+                var atel = false
+                let atepepe = false
+                if (spike && player) {
+                    if (nearSpike && !traps.inTrap) {
+                        if (!clicks.left && !clicks.right && !instaC.isTrue) {
+                            if (player.weaponIndex != player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0] || player.buildIndex > -1) {
+                                if (player.weapons[1] == 10) {
+                                    selectWeapon(player.weapons[1]);
+                                } else {
+                                    selectWeapon(player.weapons[0]);
+                                }
+                            }
+                            my.autopush = false
+                            if (player.reloads[player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0]] == 0 && !my.waitHit) {
+                                if (my.anti0Tick > 0 && near.primaryIndex != 7) {
+                                    buyEquip(6, 0)
+                                } else {
+                                    buyEquip(40, 0)
+                                }
+                                atel = true
+                                my.autopush = false
+                                if (spikerstop)
+                                    showSettingText(1000, "AntiPush", "#ff00e6");
+                            }
+                            my.autoPush = false
+                            sendAutoGather();
+                            let rererere = packet("D", UTILS.getDirect(nearSpike, player, 0, 2));
+                            my.waitHit = 1;
+                            game.tickBase(() => {
+                                sendAutoGather();
+                                my.waitHit = 0;
+                                let speedererer = gameObjects.filter(tmp => (tmp.name == "spikes" || tmp.name == "greater spikes" || tmp.name == "spinning spikes" || tmp.name == "poison spikes") && tmp.dmg && tmp.active && !tmp.isTeamObject(player) && UTILS.getDist(tmp, player, 0, 3) < (tmp.scale + player.weapons[1] == 10 ? items.weapons[player.weapons[1]].range + 70.5 : items.weapons[player.weapons[0]].range + 47.8)).sort(function(a, b) {
+                                    return UTILS.getDist(a, player, 0, 2) - UTILS.getDist(b, player, 0, 2);
+                                })[0];
+                                if (spikerstop) {
+                                    let nearSpike = []
+                                    packet("9", null, 1);
+                                } else {
+                                    packet("9", null, 1);
+
+                                }
+                            }, 1);
+                        }
+                    }
+                }
             }
             let hatChanger = function () {
                 if (my.anti0Tick > 0) {
@@ -9210,13 +9238,6 @@ function updatePlayers(data) {
                                 }
                             }
                         }
-                    }
-                }
-            }
-            let SmartAntiSpiketick = function() {
-                if (traps.inTrap) {
-                    if (near.dist2 <= 150) {
-                        buyEquip(6, 0);
                     }
                 }
             }
@@ -9292,6 +9313,14 @@ function updatePlayers(data) {
                     buyEquip(11, 1);
                 }
             }
+            if (storeMenu.style.display != "block" && !instaC.isTrue && !instaC.ticking) {
+                if (useWasd) {
+                    wasdGears();
+                } else {
+                    hatChanger();
+                    accChanger();
+                }
+            }
             if (modConfigs.autoPush && enemy.length && !traps.inTrap && !instaC.ticking) {
                 autoPush();
             } else {
@@ -9309,7 +9338,6 @@ function updatePlayers(data) {
             if (!instaC.isTrue && !traps.replaced) {
                 traps.preplace();
             }
-
             if (instaC.ticking) {
                 instaC.ticking = false;
             }
