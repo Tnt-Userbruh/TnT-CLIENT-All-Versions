@@ -291,15 +291,15 @@ class Altchad {
 }
 
 let altchas = new Altchad();
-let tokens = null;
+let tks = null;
 
-async function getfuckingtoken() {
-    tokens = await altchas.generate();
+async function getfk() {
+    tks = await altchas.generate();
 }
 async function enterGamebutton() {
-    await getfuckingtoken();
-    (tokens);
-    console.log("tokenb got")
+    await getfk();
+    (tks);
+    console.log("got the fuck")
 }
 let altcha = document.getElementById("altcha");
 let checkbox = document.getElementById('altcha_checkbox');
@@ -321,6 +321,16 @@ window.addEventListener("load", () => {
         altcha.addEventListener("statechange", sd);
         console.log("shit verified")
     }
+    var allianceButton = document.getElementById('allianceButton');
+    var storeButton = document.getElementById('storeButton');
+    if (storeButton) {
+        storeButton.style.right = '26px';
+        storeButton.style.top = '420px';
+    }
+    if (allianceButton) {
+        allianceButton.style.right = '26px';
+        allianceButton.style.top = '479px';
+    }
 });
 document.getElementById("enterGame").addEventListener("mouseenter", function() {
     document.getElementById('enterGame').innerText = "⇏ ‍Enter Game ‍⇍";
@@ -328,7 +338,6 @@ document.getElementById("enterGame").addEventListener("mouseenter", function() {
 document.getElementById("enterGame").addEventListener("mouseleave", function() {
     document.getElementById('enterGame').innerText = "⇏ ‍  ‍  ‍Enter Game ‍ ‍   ‍⇍";
 });
-
 function sd(e) {
     var t;
     if (((t = e == null ? undefined : e.detail) == null ? undefined : t.state) === "verified") {
@@ -426,14 +435,6 @@ config.weaponVariants = [{
     val: 1.18,
 }];
 
-// VOLCANO:
-config.volcanoScale = 320;
-config.innerVolcanoScale = 100;
-config.volcanoAnimalStrength = 2;
-config.volcanoAnimationDuration = 3200;
-config.volcanoAggressionRadius = 1440;
-config.volcanoAggressionPercentage = 0.2;
-config.volcanoDamagePerSecond = -1;
 // WHY OP PING :sob:
 window.ping = 0;
 
@@ -479,25 +480,24 @@ let modConfigs = {
     autoReplace: true,
     autoRespawn: true,
     autoSync: false,
-    antiAgeDie: true,
+    antiAgeDie: false,
     antiSpikeTick: true,
-    prePlace: false,
-    doSpikeOnReverse: true,
+    prePlace: true,
+    doSpikeOnReverse: false,
     autoPushDaggerSpam: false,
     killChat: true,
     weaponGrinder: false,
-    revTick: true,
     spikeTick: true,
     predictTick: true,
     placeVis: true,
     buildingHealth: true,
-    anticlown: false,
+    antiShame: true,
     antiTrap: true,
-    autoOneTick: true,
+    autoOneTick: false,
     showGrid: true,
     customMap: true,
     showDir: true,
-    acceptplayers: false,
+    acceptplayers: true,
     autoBreakSpike: true,
     safeFalk: true,
 };
@@ -538,15 +538,6 @@ let doSpikeRedThingmajic = false;
 let player;
 let playerSID;
 let tmpObj;
-let xof = undefined;
-let yof = undefined;
-let volcano = {
-    animationTime: 0,
-    land: null,
-    lava: null,
-    x: 13960,
-    y: 13960,
-};
 let allChats = [];
 let ais = [];
 let players = [];
@@ -727,21 +718,20 @@ WebSocket.prototype.send = function (message) {
             }
         } else if (type == "L") {
             // MAKE SAME CLAN:
-            data[0] = data[0] + String.fromCharCode(0).repeat(7);
+            data[0] = data[0] + (String.fromCharCode(0).repeat(7));
             data[0] = data[0].slice(0, 7);
         } else if (type == "M") {
-            // APPLY CYAN COLOR:
-            data[0].name = data[0].name == "" ? "unknown" : data[0].name;
+            data[0].name = data[0].name == "" ? "Botss" : data[0].name;
             data[0].moofoll = true;
             data[0].skin = data[0].skin == 10 ? "__proto__" : data[0].skin;
             lastsp = [data[0].name, data[0].moofoll, data[0].skin];
         } else if (type == "D") {
-            if (my.lastDir == data[0] || [null, undefined].includes(data[0])) {
+            if ((my.lastDir == data[0]) || [null, undefined].includes(data[0])) {
                 dontSend = true;
             } else {
                 my.lastDir = data[0];
             }
-        } else if (type == "F") {
+        } else if (type == "d") {
             if (!data[2]) {
                 dontSend = true;
             } else {
@@ -753,6 +743,10 @@ WebSocket.prototype.send = function (message) {
             if (!data[1]) {
                 dontSend = true;
             }
+        } else if (type == "S") {
+            instaC.wait = !instaC.wait;
+            dontSend = true;
+            showSettingText(1000, `Insta || ${(instaC.wait ? "ON" : "OFF")}`, "#00f7ff");
         } else if (type == "f") {
             if (data[1]) {
                 if (player.moveDir == data[0]) {
@@ -841,21 +835,18 @@ let menu = document.createElement("div");
 menu.id = "menupanel";
 document.body.append(menu);
 menu.style = `
-    position: absolute;
-    top: 3%;
-    left: 2%;
-    width: 591px;
-    height: 342px;
-    background: linear-gradient(137deg, rgb(14 17 66), rgb(167 0 255 / 22%));
+    position: fixed;
+    top: 15%;
+    left: 20%;
+    width: 800px;
+    height: 500px;
+    background: linear-gradient(137deg, rgb(20 0 33), rgb(56 0 86 / 57%));
     backdrop-filter: blur(10px);
-    border-radius: 20px;
-    box-shadow: rgb(0 255 198 / 99%) 0px 0px 10px 3px;
-    color: #2c3e50;
-    user-select: none;
-    z-index: 999999;
-    display: show;
-    overflow: hidden;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 10px;
+    border: 4px solid #00efff;
+    z-index: 10;
+    display: none;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0s, opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0s;
 `
 let renderIcons = "M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25";
 
@@ -882,11 +873,24 @@ const HTML = {
     text: function(id, value, size, length) {
         return `<input class="typer" type = "text" id = ${id} size = ${size} value = ${value} maxlength = ${length}>`;
     },
+    checkBox: function(id) {
+        return `<input class="checkB" id=${id} type ="checkbox" ${(modConfigs[id]) ? "checked" : ""}>`;
+    },
     justInfos: function(id, name, info, forSmart = false) {
         return `
-          <div class="framev2 ${(modConfigs[id]) ? "active" : ""}"; id=${id}>
+          <div class="infoDiv ${(modConfigs[id]) ? "active" : ""}"; id=${id}>
+          <div class="infoDesc">
             <label style="font-size: 18px;">${name}</label><br>
-            <div class="${forSmart ? "intoFrmaes" : ""}">${info}</div>
+            <div style="font-size: 15px; color: #254481"; class="${forSmart ? "intoFrmaes" : ""}">${info}</div>
+          </div>
+          </div>
+        `;
+    },
+    addDesc: function(name, info, forSmart = false) {
+        return `
+          <div class="infoDesc">
+            <label style="font-size: 18px;">${name}</label><br>
+            <div style="font-size: 15px; color: #254481"; class="${forSmart ? "intoFrmaes" : ""}">${info}</div>
           </div>
         `;
     },
@@ -894,7 +898,7 @@ const HTML = {
         return `<button class = ${classs} id = ${id} onclick = ${onclick}>${name}</button>`;
     },
     select: function(id, selects) {
-        let text = `<select class="framev3" id = ${id}>`;
+        let text = `<select class="selector" id = ${id}>`;
         selects.forEach((e,i)=>{
             text += `<option value = ${e.value} ${e.selected ? ` selected` : ``}>${e.name}</option>`;
             if (i == selects.length - 1) {
@@ -925,53 +929,8 @@ const HTML = {
           </label>
         `;
     },
-    modChange: function(id, selects) {
-        console.log("test");
-    },
-    mod: function(id, selects) {
-        let text = `<select id = ${id}>`;
-        selects.forEach((e, i) => {
-            text += `<option value = ${e.value + "C"}>${e.name}</option>`;
-            if (i == selects.length - 1) {
-                text += `</select> `;
-            }
-            if (i == 0) {
-                firsto.push(e.value + "C");
-            }
-        });
-        selects.forEach((e, i) => {
-            text += `<input type = "checkbox"  ${e.checked ? `checked` : ``} id = ${e.value} style = "${i == 0 ? "display: inline-block;" : "display: none;"}">`;
-        });
-        return text;
-    },
     hotkey: function(id, value, size, length) {
         return `<input type = "text" id = ${id} size = ${size} value = ${value} maxlength = ${length}><input type = "checkbox" checked id = ${id + "k"}>`;
-    },
-    addCheckBox: (id = "", isChecked = false, onclick = "! function(){}()") => `<label class="switch"><input type = "checkbox" id = "${id}" ${isChecked ? "checked" : ""} onclick = "${onclick}"><span class="slider round"></span></label>`,
-    addOptions: function(id = "", selected = "", options = {}, oninput = "! function(){}()") {
-        let optionsText = "";
-        for (let i in options) {
-            optionsText +=
-                `<option ${i == selected ? "selected" : ""} value = "${i}">${i}</option>`;
-        }
-        return `<select class="select" id = "${id}" oninput = "${oninput}">${optionsText}</select>`;
-    },
-    makeCheckMenu: function(Name, Info, Id, useshity = false) {
-        return `
-        <div class="ButtonMenu1">
-           ${Name}
-           <div class = "holderInfo">
-            ${Info}
-           </div>
-        </div>
-        `;
-    },
-    addIcon: function(add, makeBox = "21px", colorlel = "#fff") {
-        return `
-        <svg class = "material-icons"; xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="height: ${makeBox}; width: ${makeBox}; margin-top: 2.5px; vertical-align: -5.5px">
-            <g><path d="${add}" fill="${colorlel}" fill-opacity="1"></path>
-        </g></svg>
-        `;
     },
     addNewTheme: function(id, name) {
         return `
@@ -982,25 +941,8 @@ const HTML = {
         `;
     }
 };
-const tabs = [
-    "#sectionTab1", "#sectionTab2", "#sectionTab3", "#sectionTab4", "#sectionTab5", "#sectionTab6",
-];
-const tcontent = [
-    "#combat", "#defend", "#player", "#render", "#config", "#themes",
-];
-const themes = [
-    "#theme1", "#theme2", "#theme3",
-    "#theme4", "#theme5", "#theme6",
-    "#theme7", "#theme8", "#theme9",
-    "#theme10", "#theme11", "#theme12",
-];
 
-const color = [
-    "#aae0ff", "#ffaaf2", "#ccffaa",
-    "#df8dff", "#ffbd61", "#ff809a",
-    "#00ffb8", "#00ffe9", "#b7b7b7",
-    "#fbff74", "#87ff99", "#7e89ce",
-];
+let forSmart = false;
 
 function updateInnerHTML() {
     menu.innerHTML =
@@ -1012,41 +954,26 @@ function updateInnerHTML() {
         --body-font: Inter, sans-serif;
     }
 
-    .logoContent {
-        top: 0px;
-        left: -3px;
+    /* In Logo */
+    #logoContent {
         height: 60px;
         width: 23%;
-        background: #66470a00;
-        position: relative;
         font-family: "Inter", sans serif;
-        transition: 0.2s;
-        z-index: 90;
     }
 
-    .logotext {
+    #logotext {
         float: left;
         font-family: "Inter", sans-serif;
         margin-top: 5px;
-        color: #00fff4;
-        text-shadow: 0 0 7px #00f9fc, 0 0 7px #88feff;
-        width: auto;
-        height: auto;
+        color: var(--primary-color);
+        text-shadow: 0 0 9px var(--primary-color);
         font-size: 17.3px;
         font-weight: 500;
-        padding-top: 9px;
-        margin-left: 16px;
+        padding-top: 3px;
+        margin-left: 10px;
     }
 
-    .logotext2 {
-        font-family: Ubuntu, sans-serif;
-        position: relative;
-        color: var(--primary-color);
-        font-size: 12px;
-        text-shadow: 0 0 9px var(--primary-color);
-    }
-
-    .afterLogoContent {
+    #afterLogoContent {
         top: 0px;
         left: 0px;
         height: 342px;
@@ -1055,57 +982,83 @@ function updateInnerHTML() {
         transition: 0.2s;
     }
 
-    .sidebar {
-        width: 161px;
-        height: 181px;
-        background: linear-gradient(345deg, #00ff9b80, transparent);
-        display: flex;
-        flex-direction: column;
-        padding-top: 164px;
-        border-top-left-radius: 20px;
-        border-bottom-left-radius: 20px;
-        border-right: 3px solid rgb(0 255 198 / 99%);
-        box-shadow: 0 0 6px 2px rgb(0 255 198 / 99%);
+    /* Search bar */
+    #search-container {
+        padding-left: 22%;
+        position: absolute;
+        margin: 1%;
+        width: 65%;
+        z-index: 99;
     }
 
+    #searchBox {
+        left: 26%;
+        width: 116%;
+        padding: 10px 11px 10px 35px;
+        border-radius: 20px;
+        background: var(--primary-color);
+        backdrop-filter: blur(10px);
+        font-family: "Google Sans", sans-serif;
+        color: #2c3e50;
+        font-size: 16px;
+        transition: box-shadow 0.3s ease;
+        font-weight: 700;
+        border: 0px;
+    }
+
+    #search-icon {
+        top: -30px;
+        left: 10px;
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        position: relative;
+    }
+
+     /* Sidebar */
+     #sidebar {
+         width: 164px;
+         height: 501px;
+         background: linear-gradient(345deg, #9a652e80, transparent);
+         z-index: 999;
+         border-right: 3px solid rgb(0 245 255 / 99%);
+         position: absolute;
+     }
+
     .sectionTab {
-        display: flex;
-        align-items: normal;
-        top: -120px;
-        gap: 9px;
-        padding: 6px 6px;
-        margin: 9px 10px;
+        margin: 9px;
+        padding: 15px;
         transition: .5s;
         color: #ffffff;
         font-family: "Google Sans", sans-serif;
         font-weight: 700;
         font-size: 15px;
         border-radius: 7px;
-        user-select: none;
         position: relative;
+        top: 60px;
     }
 
-    .focused {
-        /* This is for sectiontab */
-        transform: scale(1.1);
-        background: rgb(190 255 240 / 43%);
+    .sectionTab.focused {
+        background: rgb(255 255 255 / 16%);
     }
 
-    .mainContent {
+    .sectionTab:hover {
+        background: rgb(255 255 255 / 16%);
+    }
+
+    /* Main */
+    #mainContent {
         position: absolute;
-        flex: 1;
-        padding: 0px 0px 0px 15px;
+        margin-left: 5px;
         top: 57px;
         left: 165px;
-        height: 100%;
-        width: 399px;
-        background: transparent;
+        height: 120%;
+        width: 81%;
     }
 
     .menuTab {
         display: grid;
         align-items: center;
-        max-height: 80%;
         font-family: 'Google Sans', sans-serif;
         text-align: center;
         color: white;
@@ -1116,6 +1069,7 @@ function updateInnerHTML() {
         border-radius: 5px;
         font-size: 15px;
         font-weight: 500;
+        max-height: 100%;
     }
 
     .menuTab::-webkit-scrollbar {
@@ -1123,59 +1077,8 @@ function updateInnerHTML() {
         height: 0px;
     }
 
-    .theme {
-        user-select: none;
-        position: relative;
-        display: block;
-        width: 90px;
-        height: 70px;
-        top: 25%;
-        left: 10%;
-        border-radius: 6px;
-        clip-path: inset(0 round 9px);
-        text-align: center;
-        line-height: 25px;
-        color: white;
-        background: transparent;
-        transition: 0.2s;
-        padding: 5px;
-    }
-
-    .theme:hover {
-        transform: scale(1.1);
-    }
-
-    #themes {
-        display: none;
-        flex-wrap: wrap;
-        grid-template-columns: repeat(4, 1fr);
-        grid-row-gap: 0px;
-        align-items: center;
-    }
-
-    .makeColor {
-        font-size: 12px;
-        user-select: none;
-        position: relative;
-        display: block;
-        width: 100%;
-        height: 55%;
-        border-radius: 6px;
-        text-align: center;
-        line-height: 25px;
-        color: white;
-        transition: 0.2s;
-        margin-top: 2px;
-        transform: scale(0.85);
-    }
-
-    .makeText {
-        font-family: var(--body-font);
-        font-size: 15px;
-        font-weight: 500;
-    }
-
-    .framev2 {
+    /* Menu interaction */
+    .infoDiv {
         font-family: 'Google Sans', sans-serif;
         color: #fff;
         background-color: rgb(51 51 82 / 63%);
@@ -1187,25 +1090,11 @@ function updateInnerHTML() {
         text-align: start;
         transform: scale(1);
         width: 90%;
+        display: flex;
+        justify-content: space-between;
     }
 
-    .framev2:hover {
-        transform: scale(1.05)
-    }
-
-    .framev2.active {
-        background-color: var(--primary-color);
-        color: #333352;
-    }
-
-    .frameholder {
-        background: rgb(51 51 82 / 63%);
-        border-radius: 4px;
-        width: 95%;
-        margin: 10px;
-    }
-
-    .framev3 {
+    .selector {
         transform: scale(1);
         width: 69%;
         font-family: 'Google Sans', sans-serif;
@@ -1219,19 +1108,53 @@ function updateInnerHTML() {
         text-align: start;
     }
 
-    .framev3:hover {
-        transform: scale(1.05);
-    }
-
     .typer {
         transition: 0.5s;
         color: #333352;
         padding: 2px;
+        width: 50px;
+        height: 50px;
         border-radius: 5px;
         border: none;
         outline: none;
         text-align: center;
         background: var(--primary-color);
+    }
+
+    /* Checkbox */
+    .checkB {
+        position: relative;
+        cursor: pointer;
+        appearance: none;
+        width: 50px;
+        height: 50px;
+        border: 2px solid #555;
+        border-radius: 50%;
+        background-color: transparent;
+        vertical-align: middle;
+        margin-right: 10px;
+    }
+
+    .checkB:checked {
+        background-color: var(--primary-color);
+    }
+
+    .checkB::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 10px;
+        height: 10px;
+        background-color: #975500;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .checkB:checked::after {
+        opacity: 1;
     }
 
     input[type="number"] {
@@ -1286,7 +1209,6 @@ function updateInnerHTML() {
     }
 
     input[type="range"]::-webkit-slider-thumb {
-        /* removing default appearance */
         -webkit-appearance: none;
         appearance: none;
         height: 10px;
@@ -1306,60 +1228,64 @@ function updateInnerHTML() {
         box-shadow: -407px 0 0 400px #222d2e;
     }
 
-    /* Search bar */
-    .search-container {
-        margin: 3px;
-        padding: 0px;
-        position: absolute;
-        height: 12%;
-        width: 50%;
-        left: 184px;
-        top: 5px;
-        z-index: 90;
+    /* Theme tab */
+    #themes {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        grid-row-gap: 13px;
+        height: 200%;
+        align-items: center;
+        overflow: hidden;
     }
 
-    #menupanel input[type="search"] {
-        left: 26%;
-        width: 116%;
-        padding: 10px 11px 10px 35px;
-        border: none;
-        border-radius: 20px;
-        background: rgb(187 186 255 / 26%);
-        backdrop-filter: blur(10px);
-        font-family: "Google Sans", sans-serif;
-        color: #00ffe1;
-        font-size: 16px;
-        transition: box-shadow 0.3s ease;
-        font-weight: 700;
-    }
-
-    #menupanel input[type="search"]:focus {
-        box-shadow: 0 0 7px 6px #00ffdd;
-        border: none;
-    }
-
-    #menupanel .search-icon {
-        top: -30px;
-        left: 10px;
-        width: 20px;
-        height: 20px;
-        fill: #2c3e50;
-        pointer-events: none;
+    .theme {
         position: relative;
+        height: 70px;
+        width: 90px;
+        top: 10px;
+        left: 24%;
+        border-radius: 6px;
+        text-align: center;
+        color: white;
+        background: transparent;
+        transition: 0.2s;
+        overflow: hidden;
+    }
+
+    .theme:hover {
+        transform: scale(1.1);
+    }
+
+    .makeColor {
+        font-size: 12px;
+        position: relative;
+        height: 55%;
+        border-radius: 6px;
+        text-align: center;
+        color: white;
+        transition: 0.2s;
+        transform: scale(0.85);
+    }
+
+    .makeText {
+        font-family: var(--body-font);
+        font-size: 15px;
+        font-weight: 500;
     }
 </style>
 <div>
-    <div class="logoContent">
-        <span class="logotext">TπT CLIENT<font class="logotext2">v2</font></span>
+    <div id="logoContent">
+        <span id="logotext">TπT CLIENT v2.5</span>
+        <div id="search-container">
+            <input type="search" id="searchBox" autocomplete="off" />
+            <svg id="search-icon" viewBox="0 0 24 24">
+                <path d="M21 21l-4.35-4.35m1.6-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+        </div>
     </div>
-    <div class="search-container">
-        <input type="search" id="searchBox" autocomplete="off" />
-        <svg class="search-icon" viewBox="0 0 24 24">
-            <path d="M21 21l-4.35-4.35m1.6-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke="#00ffe1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-        </svg>
-    </div>
-    <div class="afterLogoContent">
-        <div class="sidebar">
+    <div id="afterLogoContent">
+        <div id="sidebar">
             <div class="sectionTab" id="sectionTab1">
                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" x="0" y="0" viewBox="0 0 365.725 365.725" style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
                     <g>
@@ -1427,60 +1353,140 @@ function updateInnerHTML() {
                 </svg> Themes
             </div>
         </div>
-        <div class="mainContent">
+        <div id="mainContent">
 
             <div class="menuTab" id="combat">
-                ${HTML.justInfos("autoPlace", "Auto Placer", "Auto place objects for you")}
-                ${HTML.justInfos("autoReplace", "Auto Replacer", "Auto replaces objects after breaking it")}
-                ${HTML.justInfos("prePlace","Auto Preplace","Auto preplaces objects")}
-                ${HTML.justInfos("autoPush", "Auto Push", "Auto Pushes Enemy Into Spike")}
-                ${HTML.justInfos("autoSync", "Auto Sync", "why gay :sob:")}
-                ${HTML.justInfos("spikeTick", "Spike Tick", "Stacked SpikeTick")}
-                ${HTML.justInfos("autoPushDaggerSpam", "Dagger Spam", "Spam dagger while autopush",)}
-                ${HTML.justInfos("doSpikeOnReverse", "Spike on Rev", "Recommended")}
-                <div class="frameholder">
-                    Insta Type:
-                    ${HTML.select("instaType",  [{name: "Normal", value: "normal" }, {name: "Reverse", value: "rev" }, {name: "NoBull", value: "nobull" }] )}
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Placer", "Auto place objects for you")}
+                    ${HTML.checkBox("autoPlace")}
                 </div>
-                <div class="frameholder">
-                    AntiBull Type:
-                    ${HTML.select("antiBullType", [{name: "Disable", value: "antibulldisable" }, {name: "Always", value: "antibullalway" }, {name: "When Reloaded", value: "antibullreload" }] )}
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Replacer", "Auto replaces objects after breaking it")}
+
+                    ${HTML.checkBox("autoReplace")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Preplace", "Preplace Spikes")}
+                    ${HTML.checkBox("prePlace")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Push", "Auto Pushes Enemy Into Spike")}
+                    ${HTML.checkBox("autoPush")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Dagger spam", "Hit with daggers while autoPush")}
+                    ${HTML.checkBox("autoPushDaggerSpam")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Sync", "Auto sync when teammate hit enemy")}
+                    ${HTML.checkBox("autoSync")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Spike Tick", "Stacked SpikeTick")}
+                    ${HTML.checkBox("spikeTick")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Spike on Rev", "Recommended")}
+                    ${HTML.checkBox("doSpikeOnRev")}
                 </div>
             </div>
 
             <div class="menuTab" id="defend">
-                ${HTML.justInfos("antiAgeDie", "Anti Age1 Instakillers", "Age 1 instakillers are 100% gays")}
-                ${HTML.justInfos("antiTrap", "Anti Trap", "Auto Break Traps")}
-                ${HTML.justInfos("autoBreakSpike", "Anti Spike", "Auto Break Spikes")}
-                ${HTML.justInfos("antiSpikeTick", "Anti Spike tick", "No spike tick")}
-                ${HTML.justInfos("predictTick", "Predict Tick", "Predicts enemy ticks")}
-                ${HTML.justInfos("safeFalk", "Safe Walk", "Anti push spikes")}
-                ${HTML.justInfos("anticlown","Anti Shame","Prevents you from getting Shame! hat")}
-                ${HTML.justInfos("autoOneTick", "Auto One Tick", "WHY ONE TICK", )}
+                <div class="infoDiv">
+                    ${HTML.addDesc("Anti Age1 Instas", "Prevents you from dying to insta at age1")}
+                    ${HTML.checkBox("antiAgeDie")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Anti Trap", "Auto breaks traps")}
+                    ${HTML.checkBox("antiTrap")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Break Spike", "Auto Break Spikes")}
+                    ${HTML.checkBox("autoBreakSpike")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Anti SpikeTick", "Prevents spiketick on you")}
+                    ${HTML.checkBox("antiSpikeTick")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Predict Tick", "AntiSpiketick")}
+                    ${HTML.checkBox("predictTick")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("SafeWalk", "Anti Push")}
+                    ${HTML.checkBox("safeFalk")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Anti Shame","Prevents you from getting Shame! hat")}
+                    ${HTML.checkBox("antiShame")}
+                </div>
             </div>
 
             <div class="menuTab" id="player">
-                ${HTML.justInfos("autoBuy", "Auto Buy", "Auto buys equipment")}
-                ${HTML.justInfos("autoBuyEquip", "Auto Buy Equip", "Auto buy and equips equipment")}
-                ${HTML.justInfos("weaponGrinder", "Auto Grind", "Auto Place Turrets")}
-                ${HTML.justInfos("killChat", "Kill Chat", "Chat after you kill enemy")}
-                ${HTML.justInfos("autoRespawn", "Auto Respawn", "Auto respawn apon death")}
-                ${HTML.justInfos("acceptplayers","Auto Accept","Accepts anyone joining your clan")}
-                ${HTML.justInfos("showDir", "Real Dir", "Shows the distance of people")}
+                <div class="infoDiv">
+                    ${HTML.addDesc("AutoBuy", "Autobuy items")}
+                    ${HTML.checkBox("autoBuy")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("AutoBQ", "Autobuy items and equip")}
+                    ${HTML.checkBox("autoBuyEquip")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Grind", "Auto Place Turrets")}
+
+                    ${HTML.checkBox("weaponGrinder")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Kill Chat", "Chat after you kill enemy")}
+
+                    ${HTML.checkBox("killChat")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Respawn", "Auto respawn apon death")}
+                    ${HTML.checkBox("autoRespawn")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Auto Accept","Auto Accept Clan Invite")}
+                    ${HTML.checkBox("acceptplayers")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Real Dir", "Shows the distance of people")}
+                    ${HTML.checkBox("showDir")}
+                </div>
             </div>
             <div class="menuTab" id="render">
                 ${HTML.justInfos("nightBox", `Night`, `
                 ${HTML.rangeValue("nightS", "nightV", "", 35, 75, 56)}
                 `, false)}
-                ${HTML.justInfos("placeVis", "Render Place", "Renders Where You Place")}
-                ${HTML.justInfos("buildingHealth", "Build Hp", "Renders Building HP")}
-                ${HTML.justInfos("customMap", "Add Custom Map", "Advanced Minimap")}
-                ${HTML.justInfos("showGrid", "No Grids", "Removes/Adds grids")}
+                <div class="infoDiv">
+                    ${HTML.addDesc("Render Place","Renders Where You Place")}
+                    ${HTML.checkBox("placeVis")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Building HP","Renders Building HP")}
+                    ${HTML.checkBox("buildingHealth")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Add Custom Map","Advanced Minimap")}
+                    ${HTML.checkBox("customMap")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("Show Grid","Adds/Removes Grids")}
+                    ${HTML.checkBox("showGrid")}
+                </div>
             </div>
             <div class="menuTab" id="config">
-                <div class="frameholder">
-                    AutoPlace Tick:
+                <div class="infoDiv">
+                    ${HTML.addDesc("AutoPlace Tick:","")}
                     ${HTML.text("autoPlaceTick", "2", "2em", "1")}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("InstaType:","")}
+                    ${HTML.select("instaType", [{name: "Normal", value: "normal" }, {name: "Reverse", value: "rev" }, {name: "NoBull", value: "nobull" }] )}
+                </div>
+                <div class="infoDiv">
+                    ${HTML.addDesc("AntiBull Type:","")}
+                    ${HTML.select("antiBullType", [{name: "Disable", value: "antibulldisable" }, {name: "Always", value: "antibullalway" }, {name: "When Reloaded", value: "antibullreload" }] )}
                 </div>
                 <br>
                 <br>
@@ -1493,8 +1499,11 @@ function updateInnerHTML() {
                 ${HTML.justInfos("pingbox", `Target Ping:`, `
                 ${HTML.rangeValue("targetPing", "pingvalue", "", 1, 200, 200)}
                 `, false)}
-                ${HTML.justInfos("lazyLoad", "Enable LazyLoad", "Enables/Disables lazyLoad")}
-                ${HTML.justInfos("resetSettings", "Reload", "Resets settings in the lag reducer")}
+                <div class="infoDiv">
+                    ${HTML.addDesc("Enable LazyLoad","")}
+                    ${HTML.checkBox("lazyLoad")}
+                </div>
+                <button id="resetSettings" onclick="resetSettings()">Reset Settings</button>
             </div>
             <div class="menuTab" id="themes">
                 ${HTML.addNewTheme("theme1", "Glacier")}
@@ -1517,16 +1526,13 @@ function updateInnerHTML() {
 }
 updateInnerHTML();
 
+const tabs = ["#sectionTab1", "#sectionTab2", "#sectionTab3", "#sectionTab4", "#sectionTab5", "#sectionTab6"];
+const tabType = ["#combat", "#defend", "#player", "#render", "#config", "#themes"];
+
 const container = document.getElementById("menupanel");
 const sidebarButtons = container && document.getElementsByClassName('.sidebar');
 const mainContent = container && getEl('#mainContent');
 const resetSettingsButton = document.getElementById('resetSettings');
-const lagLevelInput = document.querySelector("#lagLevel");
-const lagValueSpan = document.querySelector("#lagValue");
-const lazyLoadCheckbox = document.getElementById('lazyLoad');
-const targetFPSInput = document.querySelector("#targetFPS");
-const targetPingInput = document.querySelector("#targetPing");
-
 let activeTab = tabs[0].id;
 
 // search feature remade by ai cuz i ass xd
@@ -1534,7 +1540,7 @@ const searchBox = document.getElementById('searchBox');
 if (searchBox) {
     searchBox.addEventListener('input', (event) => {
         const searchText = event.target.value.toLowerCase().trim();
-        const featureContainers = document.querySelectorAll('.framev2');
+        const featureContainers = document.querySelectorAll('.infoDiv');
         let visibleCount = 0;
 
         featureContainers.forEach((container) => {
@@ -1555,9 +1561,9 @@ if (searchBox) {
             }
         });
 
-        const currentTab = document.querySelector('.menuTab[style*="display: grid"]');
+        const currentTab = document.querySelector('.menuTab');
         if (currentTab) {
-            const scrollContainer = currentTab.querySelector('.madeBoxScroll');
+            const scrollContainer = currentTab.querySelector('#mainContent');
             let noResultsDiv = scrollContainer.querySelector('.no-features');
 
             if (visibleCount === 0 && searchText !== '') {
@@ -1582,7 +1588,7 @@ if (searchBox) {
     document.querySelectorAll('.sectionTab').forEach(tab => {
         tab.addEventListener('click', () => {
             searchBox.value = '';
-            document.querySelectorAll('.framev2').forEach(container => {
+            document.querySelectorAll('.infoDiv').forEach(container => {
                 container.style.display = '';
             });
             document.querySelectorAll('.no-features').forEach(msg => {
@@ -1592,6 +1598,50 @@ if (searchBox) {
     });
 }
 
+// AI FIXED
+function toggleTab(element) {
+    // Hide all tabs
+    tabType.forEach(tab => $(tab).hide());
+    // Show selected tab with animation
+    $(element).show().css("display", "grid").hide().show("slide", {
+        direction: "left"
+    }, 200);
+}
+
+// Show defence tab by default
+toggleTab(tabType[0]);
+$("#sectionTab1").addClass("focused");
+
+// Add click handlers for each tab
+tabs.forEach((tab, index) => {
+    $(tab).on("click", function() {
+        if (!$(tabType[index]).is(":visible")) {
+            toggleTab(tabType[index]);
+        }
+    });
+});
+
+// Handle focus styling
+$(document).on("click", tabs.join(","), function() {
+    $(tabs.join(",")).removeClass("focused");
+    $(this).addClass("focused");
+});
+
+const themes = [
+    "#theme1", "#theme2", "#theme3",
+    "#theme4", "#theme5", "#theme6",
+    "#theme7", "#theme8", "#theme9",
+    "#theme10", "#theme11", "#theme12",
+];
+
+const color = [
+    "#aae0ff", "#ffaaf2", "#ccffaa",
+    "#df8dff", "#ffbd61", "#ff809a",
+    "#00ffb8", "#00ffe9", "#b7b7b7",
+    "#fbff74", "#87ff99", "#7e89ce",
+];
+
+
 $(document).ready(function () {
     // Function to update theme
     const updateTheme = (index) => {
@@ -1599,7 +1649,6 @@ $(document).ready(function () {
         $(themes.join(",")).removeClass("selected");
         clickedTheme.addClass("selected");
         $(':root').css('--primary-color', color[index]);
-        $(':root').css('--primary-color2', bgcolor[index]);
     };
 
     themes.forEach((theme, index) => {
@@ -1613,27 +1662,13 @@ $(document).ready(function () {
             updateTheme(index);
         });
     });
-
-    const ToggleTab = (element) => {
-        tcontent.forEach(tab => $(tab).hide());
-        $(element).show().css("display", "grid").hide().show("slide", { direction: "left" }, 200);
-    }
-
-    ToggleTab(tcontent[1]);
-    tabs.forEach((tab, index) => {
-        $(tab).on("click", function () {
-            if (!$(tcontent[index]).is(":visible")) {
-                ToggleTab(tcontent[index]);
-            }
-        });
-    });
-
-    $(document).on("click", tabs.join(","), function () {
-        const clickedTab = $(this);
-        $(tabs.join(",")).removeClass("focused");
-        clickedTab.addClass("focused");
-    });
 });
+
+const lagLevelInput = document.getElementById('lagLevel');
+const lagValueSpan = document.getElementById("lagValue");
+const lazyLoadCheckbox = document.getElementById('lazyLoad');
+const targetFPSInput = document.getElementById("targetFPS");
+const targetPingInput = document.getElementById("targetPing");
 
 // LAG REDUCER:
 function detectFPSping() {
@@ -1743,7 +1778,7 @@ function updatePerformanceInfo(operation, executionTime) {
 function listeninput() {
     lagLevelInput.addEventListener('input', () => {
         const lagLevel = parseInt(lagLevelInput.value, 10);
-        const lazyLoad = lazyLoadCheckbox.checked;
+        const lazyLoad = lazyLoadCheckbox.active;
         const targetFPS = parseInt(targetFPSInput.value, 10);
         const targetPing = parseInt(targetPingInput.value, 10);
 
@@ -1769,13 +1804,11 @@ listeninput();
 
 lazyLoadCheckbox.addEventListener('change', () => {
     const settings = loadSettings();
-    saveSettings(settings.lagLevel, lazyLoadCheckbox.checked, settings.targetFPS, settings.targetPing);
-    if (lazyLoadCheckbox.checked) {
+    saveSettings(settings.lagLevel, lazyLoadCheckbox.active, settings.targetFPS, settings.targetPing);
+    if (lazyLoadCheckbox.active) {
         applyLazyLoad();
     }
 });
-
-resetSettingsButton.addEventListener('click', resetSettings);
 
 
 // BUTTON SYSTEM
@@ -1786,7 +1819,7 @@ function toggleButton(id, toggledId) {
         return;
     }
     buttonElement.onclick = function(event) {
-        if (!event.target.closest('.intoFrmaes')) {
+        if (!event.target.closest('.checkB')) {
             modConfigs[toggledId || id] = !modConfigs[toggledId || id];
             buttonElement.style.transition = "0.3s";
             if (modConfigs[toggledId || id]) {
@@ -1845,8 +1878,7 @@ toggleButton("autoBreakSpike");
 toggleButton("antiSpikeTick");
 toggleButton("predictTick");
 toggleButton("safeFalk");
-toggleButton("anticlown");
-toggleButton("autoOneTick");
+toggleButton("antiShame");
 
 // PLAYER
 toggleButton("autoBuy");
@@ -1985,7 +2017,7 @@ let menuIsToggling = false;
 let chatToggled = false;
 let chatistoggling = false;
 document.addEventListener("keydown", event => {
-    if (event.keyCode == 27 && !menuIsToggling && inGame) {
+    if (event.keyCode == 27 && !menuIsToggling) {
         menuIsToggling = true;
         if (!menuToggled) {
             menu.style.display = "block";
@@ -2161,7 +2193,6 @@ function findProjectileBySid(sid) {
 
 let firstSetup = true;
 let attackState = 0;
-let nearHacker = [];
 let aST = false;
 let mills = {
     place: 0,
@@ -4977,7 +5008,7 @@ class Player {
                             if (modConfigs.weaponGrinder) {
                                 for (let i = 0; i < Math.PI * 2; i += Math.PI / 2) {
                                     checkPlace(player.getItemType(22), i);
-                                    buyEquip(40, 0)
+                                    buyEquip(40, 0);
                                 }
                             }
                         }
@@ -5182,24 +5213,6 @@ function checkPlace(id, rad) {
         }
     } catch (e) {}
 }
-
-function syncEmBois() {
-    if (getEl("autoSync") && !modConfigs.autoSync) {
-            sendChat("% !Sync %")
-            my.autoAim = true;
-            selectWeapon(player.weapons[0]);
-            buyEquip(7, 0);
-            sendAutoGather();
-            game.tickBase(() => {
-                selectWeapon(player.weapons[1]);
-                buyEquip(player.reloads[53] === 0 ? 53 : 6, 0);
-                game.tickBase(() => {
-                    sendAutoGather();
-                    my.autoAim = false;
-                }, 3);
-            }, 2);
-        }
-    }
 
 function getDamageThreat(tmpObj) {
     tmpObj.instaThreat = 0;
@@ -5419,7 +5432,6 @@ function getNearbyEnemies() {
     // UPDATE HEALTH:
     let doEmpAntiInsta = false;
     let judgeAtNextTick = false;
-    let nearSpike = [];
 
     function updateHealth(sid, value) {
         tmpObj = findPlayerBySID(sid);
@@ -5868,23 +5880,21 @@ function sendMoveDir() {
     }
 }
 
-function biomeGear(mover, returns) {
+// EQUIP HATS:
+function biomeGear() {
     if (player.y2 >= config.mapScale / 2 - config.riverWidth / 2 && player.y2 <= config.mapScale / 2 + config.riverWidth / 2) {
-        if (returns) return 31;
         buyEquip(31, 0);
     } else {
-        if (player.y2 <= config.snowBiomeTop) {
-            if (returns) return mover && player.moveDir == undefined ? 11 : 15;
-            buyEquip(mover && player.moveDir == undefined ? 11 : 15, 0);
-            if (returns) return mover && player.moveDir == undefined ? 22 : 15;
-            buyEquip(mover && player.moveDir == undefined ? 6 : 15, 0);
+        if (isMoveDir == undefined) {
+            buyEquip(22 || 6, 0);
         } else {
-            if (returns) return mover && player.moveDir == undefined ? 22 : 12;
-            buyEquip(mover && player.moveDir == undefined ? 6 : 12, 0);
-            if (returns) return mover && player.moveDir == undefined ? 22 : 12;
+            if (player.y2 <= config.snowBiomeTop) {
+                buyEquip(15, 0);
+            } else {
+                buyEquip(12, 0);
+            }
         }
     }
-    if (returns) return 0;
 }
 
 function woah(mover) {
@@ -5982,6 +5992,7 @@ class Traps {
                 }
             } catch (err) {}
         };
+
         this.checkSpikeTick = function() {
             try {
                 if (this.inTrap && near.dist2 <= items.weapons[near.primaryIndex || 5].range + near.scale * 1.2 && [3, 4, 5].includes(near.primaryIndex) && this.info.health <= items.weapons[player.weaponIndex].dmg * (config.weaponVariants[player[(player.weaponIndex < 9 ? "prima" : "seconda") + "ryVariant"]].val) * (items.weapons[player.weaponIndex].sDmg || 1) * 3.3) return true
@@ -6013,11 +6024,13 @@ class Traps {
             }
             return false;
         }
+
         this.protect = function(aim) {
             if (!modConfigs.antiTrap) return;
             if (player.items[4]) {
                 this.testCanPlace(2, -(Math.PI / 2), Math.PI / 2, Math.PI / 18, aim + Math.PI);
                 this.antiTrapped = true;
+                this.inTrap = true;
             }
         };
 
@@ -6061,34 +6074,23 @@ class Traps {
                         let antiTrapAngles = Math.PI / Math.floor(Math.random() * (20 - 10 + 1)) + 10;
                         this.testCanPlace(4, -(Math.PI / 2), (Math.PI / 2), antiTrapAngles, near.aim2);
                     } else {
-                        if (trap1 && near.dist2 <= 180) {
-                            const trapX = trap1.x;
-                            const trapY = trap1.y;
-                            const circleRadius = 102;
-                            const numPositions = 64;
-                            for (let i = 0; i < numPositions; i++) {
-                                const angle = (2 * Math.PI * i) / numPositions;
-                                const offsetX = trapX + circleRadius * Math.cos(angle);
-                                const offsetY = trapY + circleRadius * Math.sin(angle);
-                                const position = [offsetX, offsetY];
-                                const distToPlayer = Math.hypot(position[0] - player.x2, position[1] - player.y2);
-                                if (isPositionValid(position) && distToPlayer <= 87) {
-                                    const angleToPlace = Math.atan2(position[1] - player.y2, position[0] - player.x2);
-                                    checkPlace(2, angleToPlace);
-                                }
-                            }
-                        } else if (!trap1 && near.dist2 <= 206) {
-                            const maxTrapsToPlace = 3;
-                            const trapRadius = 50;
-                            const trapPositions = calculatePossibleTrapPositions(player.x2, player.y2, trapRadius);
-                            let trapsPlaced = 0;
-                            for (const position of trapPositions) {
-                                if (trapsPlaced < maxTrapsToPlace && isPositionValid(position)) {
-                                    checkPlace(4, ...position);
-                                    trapsPlaced++;
-                                }
+                        if (near.dist3 <= 450) {
+                            if (near.dist3 <= 200) {
+                                this.testCanPlace(4, 0, Math.PI * 2, Math.PI / 24, near.aim2, 0, {
+                                    inTrap: isNearTrap
+                                });
+                            } else if (player.items[4] === 15) {
+                                this.testCanPlace(4, 0, Math.PI * 2, Math.PI / 24, near.aim2);
                             }
                         }
+                        const closestTrap = gameObjects.filter(e => e.trap && e.active).sort((a, b) => UTILS.getDist(a, near, 0, 2) - UTILS.getDist(b, near, 0, 2)).find(trap => {
+                            const trapDist = Math.hypot(trap.y - near.y2, trap.x - near.x2);
+                            return (
+                                trap !== player &&
+                                (player.sid === trap.owner.sid || findAllianceBySid(trap.owner.sid)) &&
+                                trapDist <= 50
+                            );
+                        });
                     }
                 } catch (e) {
                     console.log(e);
@@ -6096,28 +6098,28 @@ class Traps {
             }
         };
 
-       function calculatePerfectAngle(x1, y1, x2, y2) {
-           return Math.atan2(y2 - y1, x2 - x1);
-       }
-       this.replacer = function(findObj) {
-           if (!findObj || !modConfigs.autoReplace) return;
-           if (!inGame) return;
-           if (this.antiTrapped) return;
-           game.tickBase(() => {
-               let objAim = UTILS.getDirect(findObj, player, 0, 2);
-               let objDst = UTILS.getDist(findObj, player, 0, 2);
-               if (modConfigs.weaponGrinder && objDst <= items.weapons[player.weaponIndex].range + player.scale) return;
-               if (objDst <= 400 && near.dist2 <= 400) {
-                   let danger = this.checkSpikeTick();
-                   if (!danger && near.dist2 <= items.weapons[near.primaryIndex || 5].range + (near.scale * 1.8)) {
-                       this.testCanPlace(2, 0, (Math.PI * 2), (Math.PI / 24), objAim, 1);
-                   } else {
-                       player.items[4] == 15 && this.testCanPlace(4, 0, (Math.PI * 2), (Math.PI / 24), objAim, 1);
-                   }
-                   this.replaced = true;
-               }
-           }, 1);
-       };
+        function calculatePerfectAngle(x1, y1, x2, y2) {
+            return Math.atan2(y2 - y1, x2 - x1);
+        }
+        this.replacer = function(findObj) {
+            if (!findObj || !modConfigs.autoReplace) return;
+            if (!inGame) return;
+            if (this.antiTrapped) return;
+            game.tickBase(() => {
+                let objAim = UTILS.getDirect(findObj, player, 0, 2);
+                let objDst = UTILS.getDist(findObj, player, 0, 2);
+                if (modConfigs.weaponGrinder && objDst <= items.weapons[player.weaponIndex].range + player.scale) return;
+                if (objDst <= 400 && near.dist2 <= 400) {
+                    let danger = this.checkSpikeTick();
+                    if (!danger && near.dist2 <= items.weapons[near.primaryIndex || 5].range + (near.scale * 1.8)) {
+                        this.testCanPlace(2, 0, (Math.PI * 2), (Math.PI / 24), objAim, 1);
+                    } else {
+                        player.items[4] == 15 && this.testCanPlace(4, 0, (Math.PI * 2), (Math.PI / 24), objAim, 1);
+                    }
+                    this.replaced = true;
+                }
+            }, 1);
+        };
 
         // PREPLACER
         let closestBuild = [];
@@ -6157,88 +6159,82 @@ class Traps {
         this.preplace = function() {
             if (traps.inTrap) return;
             if (!modConfigs.prePlace) return;
-            if (modConfigs.prePlace) {
 
-                const weaponRange = items.weapons[player.weaponIndex].range + 70;
-                const rangeSquared = weaponRange ** 2;
+            const weaponRange = items.weapons[player.weaponIndex].range + 70;
+            const rangeSquared = weaponRange ** 2;
+            const {
+                x2: playerX,
+                y2: playerY
+            } = player;
+
+            const lowHealthGameObjects = gameObjects.filter(gameObject => {
                 const {
-                    x2: playerX,
-                    y2: playerY
-                } = player;
+                    x2,
+                    y2,
+                    buildHealth
+                } = gameObject;
+                const distSquared = (x2 - playerX) ** 2 + (y2 - playerY) ** 2;
+                return near && buildHealth <= 272.58 && distSquared <= rangeSquared;
+            });
 
-                const lowHealthGameObjects = gameObjects.filter(gameObject => {
-                    const {
-                        x2,
-                        y2,
-                        buildHealth
-                    } = gameObject;
-                    const distSquared = (x2 - playerX) ** 2 + (y2 - playerY) ** 2;
-                    return near && buildHealth <= 272.58 && distSquared <= rangeSquared;
-                });
+            if (lowHealthGameObjects.length > 0) {
+                const {
+                    x2,
+                    y2
+                } = lowHealthGameObjects[0];
+                const objAim = UTILS.getDirect({
+                    x2,
+                    y2
+                }, player, 0, 2);
+                const trapPlacementRadius = 70;
 
-                if (lowHealthGameObjects.length > 0) {
-                    const {
-                        x2,
-                        y2
-                    } = lowHealthGameObjects[0];
-                    const objAim = UTILS.getDirect({
-                        x2,
-                        y2
-                    }, player, 0, 2);
-                    const trapPlacementRadius = 70;
+                let enemyVelocity = Math.sqrt(near.xVel * near.xVel + near.yVel * near.yVel);
+                let enemyDirection = Math.atan2(near.yVel, near.xVel);
 
-                    let enemyVelocity = Math.sqrt(near.xVel * near.xVel + near.yVel * near.yVel);
-                    let enemyDirection = Math.atan2(near.yVel, near.xVel);
+                let bestAngle = null;
+                let bestDistance = Infinity;
 
-                    let bestAngle = null;
-                    let bestDistance = Infinity;
+                for (let i = 0; i < 360; i += 30) {
+                    let simulatedAngle = UTILS.deg2rad(i);
+                    let distance =
+                        UTILS.getDist(near, player, 0, 2) +
+                        enemyVelocity * Math.sin(enemyDirection) +
+                        trapPlacementRadius;
 
-                    for (let i = 0; i < 360; i += 30) {
-                        let simulatedAngle = UTILS.deg2rad(i);
-                        let distance =
-                            UTILS.getDist(near, player, 0, 2) +
-                            enemyVelocity * Math.sin(enemyDirection) +
-                            trapPlacementRadius;
-
-                        if (distance < bestDistance) {
-                            bestDistance = distance;
-                            bestAngle = simulatedAngle;
-                        }
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestAngle = simulatedAngle;
                     }
+                }
 
-                    const trapPlacementTime = 5;
-                    const timeToBreak = (lowHealthGameObjects[0].buildHealth - player.damage) / (player.damagePerShot - lowHealthGameObjects[0].absorb);
-                    const enemyTimeToMoveOut = bestDistance / enemyVelocity;
+                const trapPlacementTime = 5;
+                const timeToBreak = (lowHealthGameObjects[0].buildHealth - player.damage) / (player.damagePerShot - lowHealthGameObjects[0].absorb);
+                const enemyTimeToMoveOut = bestDistance / enemyVelocity;
 
-                    if (timeToBreak + trapPlacementTime <= enemyTimeToMoveOut) {
-                        this.testCanPlace(4, bestAngle, bestAngle + Math.PI * 2, Math.PI / 24, objAim, trapPlacementRadius);
-                    }
+                if (timeToBreak + trapPlacementTime <= enemyTimeToMoveOut) {
+                    this.testCanPlace(4, bestAngle, bestAngle + Math.PI * 2, Math.PI / 24, objAim, trapPlacementRadius);
                 }
             }
         };
     }
 };
 
-function mtntinsta() { // by omen sang
-    this.isTrue = true;
-    my.autoAim = true;
-    // cant go faster
-    buyEquip(20, 0);
-    buyEquip(53, 0);
-    selectWeapon(player.weapons[0]);
-    buyEquip(7, 0);
-    sendAutoGather();
-    game.tickBase(() => {
-        selectWeapon(player.weapons[1]);
-        sendAutoGather();
-        buyEquip(player.reloads[53] == 0 ? 53 : 7, 0);
-        game.tickBase(() => {
-            place(0);
-            this.isTrue = false;
-            my.autoAim = false;
-        }, 1);
-    }, 1);
-}
+class Spikes {
+    constructor(UTILS, items) {
+        this.dist = 0;
+        this.aim = 0;
+        this.inRange = false;
+        this.info = {};
+
+        this.protect = function(aim) {
+            if (!modConfigs.autoBreakSpike) return;
+            if (player.items[4]) {
+                this.inRange = true;
+                buyEquip(40, 0);
+            }
+        };
+    }
+};
 
 class Instas {
     constructor() {
@@ -6255,74 +6251,82 @@ class Instas {
         this.revTick = false;
         this.syncHit = false;
         this.changeType = function(type) {
-            sendChat("% Eat My Caps %")
-            this.wait = false;
-            this.isTrue = true;
-            my.autoAim = true;
-            let instaLog = [type];
-            let backupNobull = near.backupNobull;
-            near.backupNobull = false;
-            game.tickBase(() => {
-                instaLog.push(player.skinIndex);
+            if (instaC.wait) {
+                showSettingText(1000, "INSTA EXECUTED", "#fff");
+                this.wait = false;
+                this.isTrue = true;
+                my.autoAim = true;
+                let instaLog = [type];
+                let backupNobull = near.backupNobull;
+                near.backupNobull = false;
                 game.tickBase(() => {
-                    if (near.skinIndex == 22 && getEl("backupNobull").checked) {
-                        near.backupNobull = true;
-                    }
                     instaLog.push(player.skinIndex);
+                    game.tickBase(() => {
+                        if (near.skinIndex == 22 && getEl("backupNobull").checked) {
+                            near.backupNobull = true;
+                        }
+                        instaLog.push(player.skinIndex);
+                    }, 1);
                 }, 1);
-            }, 1);
-            if (type == "rev") {
-                selectWeapon(player.weapons[1]);
-                buyEquip(53, 0);
-                buyEquip(21, 1);
-                sendAutoGather();
-                game.tickBase(() => {
-                    if (near.dist2 <= 140 && modConfigs.doSpikeOnReverse) place(2, getAttackDir());
+                if (type == "rev") {
+                    selectWeapon(player.weapons[1]);
+                    buyEquip(53, 0);
+                    buyEquip(21, 1);
+                    sendAutoGather();
+                    game.tickBase(() => {
+                        if (near.dist2 <= 140 && configs.doSpikeOnReverse) place(2, getAttackDir());
+                        selectWeapon(player.weapons[0]);
+                        buyEquip(7, 0);
+                        game.tickBase(() => {
+                            sendAutoGather();
+                            this.isTrue = false;
+                            my.autoAim = false;
+                        }, 1);
+                    }, 1);
+                } else if (type == "nobull") {
+                    selectWeapon(player.weapons[0]);
+                    sendAutoGather();
+                    game.tickBase(() => {
+                        selectWeapon(player.weapons[1]);
+                        buyEquip(player.reloads[53] == 0 ? 53 : 6, 0);
+                        buyEquip(21, 1);
+                        game.tickBase(() => {
+                            sendAutoGather();
+                            this.isTrue = false;
+                            my.autoAim = false;
+                        }, 1);
+                    }, 1);
+
+                } else if (type == "normal") { // made by omen
+                    this.isTrue = true;
+                    my.autoAim = true;
+                    // cant go faster
+                    buyEquip(20, 0);
+                    buyEquip(53, 0);
                     selectWeapon(player.weapons[0]);
                     buyEquip(7, 0);
+                    sendAutoGather();
                     game.tickBase(() => {
+                        selectWeapon(player.weapons[1]);
                         sendAutoGather();
+                        buyEquip(player.reloads[53] == 0 ? 53 : 7, 0);
+                        game.tickBase(() => {
+                            place(0);
+                            this.isTrue = false;
+                            my.autoAim = false;
+                        }, 1);
+                    }, 1);
+                } else {
+                    setTimeout(() => {
                         this.isTrue = false;
                         my.autoAim = false;
-                    }, 1);
-                }, 1);
-            } else if (type == "nobull") {
-                selectWeapon(player.weapons[0]);
-                sendAutoGather();
-                game.tickBase(() => {
-                    selectWeapon(player.weapons[1]);
-                    buyEquip(player.reloads[53] == 0 ? 53 : 6, 0);
-                    buyEquip(21, 1);
-                    game.tickBase(() => {
-                        sendAutoGather();
-                        this.isTrue = false;
-                        my.autoAim = false;
-                    }, 1);
-                }, 1);
-            } else if (type == "normal") {
-                selectWeapon(player.weapons[0]);
-                buyEquip(7, 0);
-                sendAutoGather();
-                game.tickBase(() => {
-                    selectWeapon(player.weapons[1]);
-                    buyEquip(player.reloads[53] == 0 ? 53 : 6, 0);
-                    buyEquip(21, 1);
-                    game.tickBase(() => {
-                        sendAutoGather();
-                        this.isTrue = false;
-                        my.autoAim = false;
-                    }, 1);
-                }, 1);
-            } else {
-                setTimeout(() => {
-                    this.isTrue = false;
-                    my.autoAim = false;
-                }, 50);
+                    }, 50);
+                }
             }
         };
         this.spikeTickType = function() {
             if (!instaC.canSpikeTick) {
-                showSettingText(1000, "SPIKE TICK!", "#eb4034");
+                showSettingText(1000, "SPIKE TICK!", "#ff1100");
                 this.isTrue = true;
                 my.autoAim = true;
                 selectWeapon(player.weapons[0]);
@@ -6416,35 +6420,37 @@ class Instas {
             }, 1);
         };
         this.autoOneTickInsta = function() {
-            showSettingText(1000, "AutoOt", "#fff");
-            this.isTrue = true;
-            my.autoAim = true;
-            selectWeapon(player.weapons[[10, 14].includes(player.weapons[1]) ? 1 : 0]);
-            biomeGear();
-            buyEquip(19, 1);
-            packet("9", near.aim2, 1);
-            selectWeapon(player.weapons[1]);
-            game.tickBase(() => {
-                buyEquip(53, 0);
+            if (modConfigs.autoOneTick) {
+                showSettingText(1000, "AutoOt", "#fe00ff");
+                this.isTrue = true;
+                my.autoAim = true;
+                selectWeapon(player.weapons[[10, 14].includes(player.weapons[1]) ? 1 : 0]);
+                biomeGear();
                 buyEquip(19, 1);
                 packet("9", near.aim2, 1);
-                buyEquip(53, 0);
-                buyEquip(7, 0);
-                if (player.weapons[1] == 15) {
-                    my.revAim = true;
-                    selectWeapon(player.weapons[0]);
-                    buyEquip(7, 0);
+                selectWeapon(player.weapons[1]);
+                game.tickBase(() => {
+                    buyEquip(53, 0);
                     buyEquip(19, 1);
                     packet("9", near.aim2, 1);
-                }
-                game.tickBase(() => {
-                    my.revAim = false;
-                    this.isTrue = false;
-                    my.autoAim = false;
-                    packet("9", undefined, 1);
+                    buyEquip(53, 0);
+                    buyEquip(7, 0);
+                    if (player.weapons[1] == 15) {
+                        my.revAim = true;
+                        selectWeapon(player.weapons[0]);
+                        buyEquip(7, 0);
+                        buyEquip(19, 1);
+                        packet("9", near.aim2, 1);
+                    }
+                    game.tickBase(() => {
+                        my.revAim = false;
+                        this.isTrue = false;
+                        my.autoAim = false;
+                        packet("9", undefined, 1);
+                    }, 1);
                 }, 1);
-            }, 1);
-            sendChat("YEEEEEEE");
+                modConfigs.autoOneTick = false;
+            }
         };
         this.gotoGoal = function(goto, OT) {
             let slowDists = (weeeee) => weeeee * config.playerScale;
@@ -6713,11 +6719,7 @@ let textManager = new Textmanager();
 let instaSpeed = 230;
 
 let traps = new Traps(UTILS, items);
-let spikes = {
-    aim: 0,
-    inRange: false,
-    info: {}
-}
+let spikes = new Spikes();
 let instaC = new Instas();
 let autoBuy = new Autobuy([40, 6, 7, 22, 53, 15, 31], [11, 21, 18, 13]);
 let autoUpgrade = new Autoupgrade();
@@ -7031,11 +7033,13 @@ function getAttackDir(debug) {
             return "0";
         }
         if (my.autoAim || ((clicks.left || (useWasd && near.dist2 <= items.weapons[player.weapons[0]].range + near.scale * 1.8 && !traps.inTrap)) && player.reloads[player.weapons[0]] == 0)) {
-            lastDir = getEl("weaponGrind").checked ? getSafeDir() : enemy.length ? my.revAim ? (near.aim2 + Math.PI) : near.aim2 : getSafeDir();
+            lastDir = modConfigs.weaponGrinder ? getSafeDir() : enemy.length ? my.revAim ? (near.aim2 + Math.PI) : near.aim2 : getSafeDir();
         } else if (clicks.right && player.reloads[player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0]] == 0) {
             lastDir = getSafeDir();
         } else if (traps.inTrap && player.reloads[traps.notFast() ? player.weapons[1] : player.weapons[0]] == 0) {
             lastDir = traps.aim;
+        } else if (spikes.inRange && player.reloads[traps.notFast() ? player.weapons[1] : player.weapons[0]] == 0) {
+            lastDir = spikes.aim;
         } else if (!player.lockDir) {
             if (os.noDir) return "undefined";
             lastDir = getSafeDir();
@@ -7046,11 +7050,13 @@ function getAttackDir(debug) {
             return 0;
         }
         if (my.autoAim || ((clicks.left || (useWasd && near.dist2 <= items.weapons[player.weapons[0]].range + near.scale * 1.8 && !traps.inTrap)) && player.reloads[player.weapons[0]] == 0)) {
-            lastDir = getEl("weaponGrind").checked ? getVisualDir() : enemy.length ? my.revAim ? (near.aim2 + Math.PI) : near.aim2 : getVisualDir();
+            lastDir = modConfigs.weaponGrinder ? getVisualDir() : enemy.length ? my.revAim ? (near.aim2 + Math.PI) : near.aim2 : getVisualDir();
         } else if (clicks.right && player.reloads[player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0]] == 0) {
             lastDir = getVisualDir();
         } else if (traps.inTrap && player.reloads[traps.notFast() ? player.weapons[1] : player.weapons[0]] == 0) {
             lastDir = traps.aim;
+        } else if (spikes.inRange && player.reloads[traps.notFast() ? player.weapons[1] : player.weapons[0]] == 0) {
+            lastDir = spikes.aim;
         } else {
             if (!player.lockDir) {
                 if (useWasd) {
@@ -7114,7 +7120,7 @@ function keyDown(event) {
                     mills.placeSpawnPads = !mills.placeSpawnPads;
                 } else if (event.key == "z") {
                     mills.place = !mills.place;
-                    showSettingText(1000, "Auto3Mill" + (mills.place ? "True" : "False"), "#00ffe1");
+                    showSettingText(1000, "Auto3Mill" + (mills.place ? "True" : "False"), "#00ffc3");
                 } else if (event.key == "Z") {
                     typeof window.debug == "function" && window.debug();
                     addMenuChText("", "Debug Completed", "#99ee99", 1);
@@ -7139,13 +7145,9 @@ function keyDown(event) {
                         const currentDisplay = chatHolder.style.display;
                         chatHolder.style.display = currentDisplay === "none" ? "block" : "none";
                     }
-                } else if (event.key == "T") {
+                } else if (event.key == "t") {
                     modConfigs.autoOneTick = !modConfigs.autoOneTick;
-                    sendChat("Tick");
-                } else if (event.key === "t") {
-                    instaC.wait = !instaC.wait;
-                    dontSend = true;
-                    sendChat((instaC.wait ? "Death" : "I'm Osama!"));
+                    showSettingText(1000, `AutoOneTick || ${(modConfigs.autoOneTick ? "ON" : "OFF")}`, "#00f7ff");
                 }
             }
         }
@@ -7983,6 +7985,9 @@ function updatePlayers(data) {
                     })[0];
                     if (nearTrap) {
                         let spike = gameObjects.filter(obj => obj.dmg && cdf(tmpObj, obj) <= tmpObj.scale + nearTrap.scale/2 && !obj.isTeamObject(tmpObj) && obj.active)[0]
+                        if (spike) {
+                            spikes.protect(caf(nearTrap, tmpObj) - Math.PI);
+                        }
                         traps.dist = UTILS.getDist(nearTrap, tmpObj, 0, 2);
                         traps.aim = UTILS.getDirect(spike ? spike : nearTrap, tmpObj, 0, 2);
                         traps.protect(caf(nearTrap, tmpObj) - Math.PI);
@@ -8120,6 +8125,21 @@ function updatePlayers(data) {
         }
         if (advHeal.length) {
             advHeal.forEach(updHealth => {
+                            let sid = updHealth[0];
+                            let value = updHealth[1];
+                            let totalDamage = 100 - value
+                            let damaged = updHealth[2];
+                            tmpObj = findPlayerBySID(sid);
+                            let bullTicked = false;
+                            if (tmpObj && tmpObj.health <= 0) {
+                                if (!tmpObj.death) {
+                                    tmpObj.death = true;
+                                    if (tmpObj != player) {
+                                       addMenuChText("", (tmpObj.name + " has died"), "#db2727", "");
+                                    }
+                                    addDeadPlayer(tmpObj);
+                                }
+                            }
                 if (typeof player !== 'undefined' && player.shameCount > 0) {
                     my.reSync = true;
                 } else {
@@ -8393,17 +8413,58 @@ function updatePlayers(data) {
             }
             tmp.updateTimer();
         });
+
         if (inGame) {
-            let autosynced = false;
-            if (!instaC.isTrue && modConfigs.autoSync && my.anti0Tick == 0 && (UTILS.getDist(player, near, 3, 3) <= items.weapons[player.primaryIndex].range + 63 || UTILS.getDist(player, near, 2, 2) <= items.weapons[player.primaryIndex].range + 63)) {
-                autosynced = true;
-                sendChat = "get sync";
-                syncEmBois();
-            }
             if (enemy.length) {
-                if (modConfigs.autoSync && (UTILS.getDist(player, nearHacker, 3, 3) <= items.weapons[player.primaryIndex].range + 63 || UTILS.getDist(player, nearHacker, 2, 2) <= items.weapons[player.primaryIndex].range + 63)) {
-                    syncEmBois();
-                    hitBull(nearHacker.aim2, 0);
+                // Auto Sync:
+                function canSyncHit() {
+                    let N = gameObjects;
+                    let _ = findPlayerByID(near);
+                    if (player.reloads[player.weapons[0]] != 1) return false;
+                    if (near.dist2 / 1.56 > items.weapons[player.weapons[0]].range) return false;
+                    let x = (_.velX || _.x2),
+                        y = (_.velY || _.y2);
+                    let isEnemyTraped = false;
+                    for (let i = 0; i < N.length; i++) {
+                        if (N[i] && N[i].name == "pit trap" && N[i].active && (N[i].owner.sid == player.sid || isAlly(N[i].owner.sid)) && Math.hypot(N[i].y - _.y2, N[i].x - _.x2) < 70) {
+                            isEnemyTraped = true;
+                        }
+                        if (N[i] && N[i].dmg && N[i].active && isEnemyTraped == false && (N[i].owner.sid == player.sid || isAlly(N[i].owner.sid))) {
+                            if (Math.hypot(N[i].y - y, N[i].x - x) <= 35 + N[i].scale) {
+                                return true;
+                            }
+                        }
+                    }
+                    if (_.health - (Math.round(items.weapons[player.weapons[0]].dmg * 1.5 * window.variantMulti(items.weapons[player.weapons[0]].variant) * (_.skinIndex == 6 ? .75 : 1))) <= 0) {
+                        return true;
+                    }
+                    return false;
+                }
+
+                if (true) {
+                    if (modConfigs.autoSync) {
+                        if (Synced.SyncShotSec >= 1 && player.weapons[1] == 15) {
+                            instaC.syncTry();
+                            Synced.SyncShotSec = 0;
+                        }
+                        if (canSyncHit() && !my.waitHit && near.dist2 <= 250 && !traps.inTrap) {
+                            setTimeout(() => {
+                                my.autoAim = true;
+                                my.waitHit = true;
+                                Hg(7, 18);
+                                sendAutoGather();
+                                setTimeout(() => {
+                                    my.autoAim = false;
+                                    my.waitHit = false;
+                                    sendAutoGather();
+                                }, 1);
+                            }, 1);
+                            sendChat("GET SYNCED BITCH")
+                        }
+                    }
+                    if ((game.tick - near.bullTick) % 9 == 0 && near.skinIndex == 7) {
+                        game.tickBase(() => {}, 1)
+                    }
                 }
                 if (player.canEmpAnti) {
                     player.canEmpAnti = false;
@@ -8586,9 +8647,9 @@ function updatePlayers(data) {
                 plcAng = options[randomIndex];
                 return plcAng;
             }
-            if (game.tick % 1.5 == 0) {
+            if (game.tick % 1 == 0) {
                 if (mills.place) {
-                    plcAng = player.items[4] == 16 ? 1.4 : 1.20427718;
+                    let plcAng = 1.5;
                     for (let i = -plcAng; i <= plcAng; i += plcAng) {
                         checkPlace(3, UTILS.getDirect(player.oldPos, player, 2, 2) + i);
                     }
@@ -8716,58 +8777,28 @@ function updatePlayers(data) {
             if (!macro.q && !macro.f && !macro.v && !macro.h && !macro.n) {
                 packet("D", getAttackDir());
             }
-            if (modConfigs.safeFalk) {
-                let nearSpike = spike;
-                let nearTp = telep;
-                var atel = false
-                let atepepe = false
-                if (spike && player) {
-                    if (nearSpike && !traps.inTrap) {
-                        if (!clicks.left && !clicks.right && !instaC.isTrue) {
-                            if (player.weaponIndex != player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0] || player.buildIndex > -1) {
-                                if (player.weapons[1] == 10) {
-                                    selectWeapon(player.weapons[1]);
-                                } else {
-                                    selectWeapon(player.weapons[0]);
-                                }
-                            }
-                            my.autopush = false
-                            if (player.reloads[player.weapons[1] == 10 ? player.weapons[1] : player.weapons[0]] == 0 && !my.waitHit) {
-                                if (my.anti0Tick > 0 && near.primaryIndex != 7) {
-                                    buyEquip(6, 0)
-                                } else {
-                                    buyEquip(40, 0)
-                                }
-                                atel = true
-                                my.autopush = false
-                                if (spikerstop)
-                                    showSettingText(1000, "AntiPush", "#ff00e6");
-                            }
-                            my.autoPush = false
-                            sendAutoGather();
-                            let rererere = packet("D", UTILS.getDirect(nearSpike, player, 0, 2));
-                            my.waitHit = 1;
-                            game.tickBase(() => {
-                                sendAutoGather();
-                                my.waitHit = 0;
-                                let speedererer = gameObjects.filter(tmp => (tmp.name == "spikes" || tmp.name == "greater spikes" || tmp.name == "spinning spikes" || tmp.name == "poison spikes") && tmp.dmg && tmp.active && !tmp.isTeamObject(player) && UTILS.getDist(tmp, player, 0, 3) < (tmp.scale + player.weapons[1] == 10 ? items.weapons[player.weapons[1]].range + 70.5 : items.weapons[player.weapons[0]].range + 47.8)).sort(function(a, b) {
-                                    return UTILS.getDist(a, player, 0, 2) - UTILS.getDist(b, player, 0, 2);
-                                })[0];
-                                if (spikerstop) {
-                                    let nearSpike = []
-                                    packet("9", null, 1);
-                                } else {
-                                    packet("9", null, 1);
+            if (modConfigs.safeFalk && modConfigs.autoBreakSpike) {
+                if (spike) {
+                    for (let i = liztobj.length; i--;) {
+                        const SCOPE = liztobj[i];
+                        const val = (SCOPE.getScale(0.6, false) / 2) + weapRange + (player.scale / 2);
 
-                                }
-                            }, 1);
-                        }
+                        if (UTILS.collisionDetection(newPos, spike, val) && UTILS.getDist(player, spike, 2, 0) >= UTILS.getDist(spike, newPos, 0, 0)) {
+                            showSettingText(1000, "AntiPush", "#ffc700");
+                            movementDirs.push({
+                                reset: true,
+                                dir: undefined,
+                                score: 3,
+                                object: spike,
+                            });
+                            break;
+                        };
                     }
                 }
             }
             let hatChanger = function () {
                 if (my.anti0Tick > 0) {
-                    showSettingText(1000, "Anti0t", "#ff00e6");
+                    showSettingText(1000, "Anti0t", "#fe00ff");
                     buyEquip(6, 0);
                     buyEquip(16, 1);
                 } else {
@@ -10799,26 +10830,6 @@ function isOnScreen(x, y, s) {
     return (x + s >= 0 && x - s <= maxScreenWidth && y + s >= 0 && (y, s, maxScreenHeight));
 }
 
-    function drawVolcano() {
-         let e = config.volcanoScale * 2;
-         tmpContext.strokeStyle = "#3e3e3e";
-         tmpContext.lineWidth = outlineWidth * 2;
-         tmpContext.fillStyle = "#7f7f7f";
-         drawRegularPolygon(tmpContext, 10, e);
-         tmpContext.fill();
-         tmpContext.stroke();
-         volcano.land = t;
-         let s = config.innerVolcanoScale * 2;
-         tmpContext.strokeStyle = outlineColor;
-         tmpContext.lineWidth = outlineWidth * 1.6;
-         tmpContext.fillStyle = "#f54e16";
-         tmpContext.strokeStyle = "#f56f16";
-         renderPolygon(tmpContext, 10, s);
-         tmpContext.fill();
-         tmpContext.stroke();
-         volcano.lava = tmpCanvas;
-    }
-
 // RENDER GAME OBJECTS:
 function renderGameObjects(layer, xOffset, yOffset) {
     let tmpSprite;
@@ -10856,16 +10867,6 @@ function renderGameObjects(layer, xOffset, yOffset) {
                     mainContext.restore();
                 } else {
                     tmpSprite = getResSprite(tmpObj);
-                        if (tmpObj.type == 4) {
-                             mainContext.globalAlpha = 1;
-                             volcano.animationTime += delta;
-                             volcano.animationTime %= config.volcanoAnimationDuration;
-                             let c = config.volcanoAnimationDuration / 2;
-                             let d = 1.7 + Math.abs(c - volcano.animationTime) / c * 0.3;
-                             let p = config.innerVolcanoScale * d;
-                             mainContext.drawImage(volcano.land, n - config.volanoScale, a - config.volanoScale, config.volanoScale * 2, config.volanoScale * 2);
-                             mainContext.drawImage(volcano.lava, n - p, a - p, p * 2, p * 2);
-                        }
                     mainContext.drawImage(tmpSprite, tmpX - (tmpSprite.width / 2), tmpY - (tmpSprite.height / 2));
                 }
             }
@@ -11055,7 +11056,7 @@ function renderMinimap(delta) {
 }
 
 // ICONS:
-let crossHairs = ["https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Crosshairs_Red.svg/1024px-Crosshairs_Red.svg.png", "https://cdn.discordapp.com/attachments/1339237455420981360/1351944705897795667/1782436.png?ex=67dc381f&is=67dae69f&hm=519b329f23587fcb0231581539f1a82f30431b83b37281a1d391f2bc59e43985&"];
+let crossHairs = ["https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Crosshairs_Red.svg/1024px-Crosshairs_Red.svg.png",""];
 var iconSprites = {};
 let crossHairSprites = {}
 var icons = ["crown", "skull"];
@@ -11598,9 +11599,18 @@ if (window.captchaCallbackComplete) {
     window.captchaCallbackHook();
 }
 
+window.startGrind = function() {
+    if (modConfigs.weaponGrinder) {
+        for (let i = 0; i < Math.PI * 2; i += Math.PI / 2) {
+            checkPlace(player.getItemType(22), i);
+            buyEquip(40, 0);
+        }
+    }
+};
 window.setTimeout(function() {
     window.onbeforeunload = null;
 }, 5000);
+
 window.leave = function () {
     origPacket("kys", {
         "frvr is so bad": true,
@@ -11609,6 +11619,13 @@ window.leave = function () {
     });
 };
 window.debug = function() {
+    my.reSync = false,
+    my.bullTick = 0,
+    my.anti0Tick = 0,
+    my.lastDir = 0,
+    my.autoPush = false,
+    my.pushData = {},
+    my.antiInsta = false,
     my.waitHit = 0;
     my.autoAim = false;
     instaC.isTrue = false;
@@ -11620,13 +11637,6 @@ window.debug = function() {
 window.wasdMode = function() {
     useWasd = !useWasd;
     toggleUseless(useWasd);
-};
-window.startGrind = function() {
-    if (modConfigs.weaponGrinder) {
-        for (let i = 0; i < Math.PI * 2; i += Math.PI / 2) {
-            checkPlace(player.getItemType(22), i);
-        }
-    }
 };
 window.leave = function () {
     origPacket("kys", {
@@ -11714,13 +11724,6 @@ body {
 
 /* % MENUCARD STYLES % */
 #setupCard {
-    vertical-align: top;
-    text-align: center;
-    white-space: normal;
-    word-wrap: break-word;
-    margin: 5px;
-    display: inline-block;
-    padding: 18px;
     border-radius: 15px;
     background: #10002f;
     box-shadow: none;
@@ -11730,13 +11733,7 @@ body {
 }
 
 #guideCard {
-    vertical-align: top;
     text-align: center;
-    white-space: normal;
-    word-wrap: break-word;
-    margin: 5px;
-    display: inline-block;
-    padding: 18px;
     border-radius: 15px;
     background: #10002f;
     box-shadow: none;
@@ -11747,13 +11744,7 @@ body {
 
 /* % GAME NAME CSS %*/
 #gameName {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100px;
-    pointer-events: none;
-    user-select: none;
-    padding: 93px;
+    padding: -25px;
     text-shadow: 0px 0px 10px #ffffff, 0px 0px 18px #24fbff, 0px 0px 40px #00fbff;
     color: #a4feff73;
 }
@@ -11764,6 +11755,15 @@ body {
         background-repeat: no-repeat;
         background-size: cover;
     }
+
+#menuContainer {
+    width: 100%;
+    white-space: nowrap;
+    text-align: center;
+    position: absolute;
+    top: 45%;
+    transform: translateY(-50%);
+}
 
 #guideCard::-webkit-scrollbar {
     width: 0px;
@@ -12051,9 +12051,90 @@ function createClan() {
     }
 }
 
+// ==UserScript==
+// @name Moomoo.io Auto reloader
+// @author Murka
+// @description Automatically reload the page on disconnect and handle errors such as "Server is full"
+// @icon https://moomoo.io/img/favicon.png?v=1
+// @version 0.5
+// @match *://moomoo.io/*
+// @match *://*.moomoo.io/*
+// @run-at document-start
+// @grant none
+// @license MIT
+// @namespace https://greasyfork.org/users/919633
+// @downloadURL https://update.greasyfork.org/scripts/446827/Moomooio%20Auto%20reloader.user.js
+// @updateURL https://update.greasyfork.org/scripts/446827/Moomooio%20Auto%20reloader.meta.js
+// ==/UserScript==
+/* jshint esversion:8 */
 
+/*
+    Author: Murka
+    Github: https://github.com/Murka007
+    Discord: https://discord.gg/cPRFdcZkeD
+    Greasyfork: https://greasyfork.org/en/users/919633
+    MooMooForge: https://github.com/MooMooForge
+*/
 
+(function() {
+    "use strict";
 
+    const log = console.log;
+    function createHook(target, prop, callback) {
+        const symbol = Symbol(prop);
+        Object.defineProperty(target, prop, {
+            get() {
+                return this[symbol];
+            },
+            set(value) {
+                callback(this, symbol, value);
+            },
+            configurable: true
+        })
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function reload() {
+        await sleep(1500);
+        window.onbeforeunload = null;
+        location.reload();
+    }
+
+    // Handles errors such as "Server is full", "Failed to find server index" etc
+    createHook(Object.prototype, "errorCallback", function(that, symbol, value) {
+        that[symbol] = value;
+
+        if (typeof value !== "function") return;
+        that[symbol] = new Proxy(value, {
+            apply(target, _this, args) {
+                window.alert = function(){}
+                reload();
+                return target.apply(_this, args);
+            }
+        })
+    })
+
+    // Handle WebSocket close and error events
+    function handleWebsocket(method) {
+        const set = Object.getOwnPropertyDescriptor(WebSocket.prototype, method).set;
+        Object.defineProperty(WebSocket.prototype, method, {
+            set(callback) {
+                return set.call(this, new Proxy(callback, {
+                    apply(target, _this, args) {
+                        reload();
+                        return target.apply(_this, args);
+                    }
+                }))
+            }
+        })
+    }
+    handleWebsocket("onclose");
+    handleWebsocket("onerror");
+
+})();
 
 
 
