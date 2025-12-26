@@ -1810,29 +1810,20 @@ lazyLoadCheckbox.addEventListener('change', () => {
     }
 });
 
-
-// BUTTON SYSTEM
+// BUTTON SYSTEM (ai fixed)
 function toggleButton(id, toggledId) {
-    const buttonElement = getEl(id);
-    if (!buttonElement) {
-        console.error(`Element with id "${id}" not found.`);
-        return;
-    }
-    buttonElement.onclick = function(event) {
-        if (!event.target.closest('.checkB')) {
-            modConfigs[toggledId || id] = !modConfigs[toggledId || id];
-            buttonElement.style.transition = "0.3s";
-            if (modConfigs[toggledId || id]) {
-                buttonElement.style.backgroundColor = "var(--primary-color)";
-                event.target.classList.add("active");
-            } else {
-                buttonElement.style.backgroundColor = "rgb(51 51 82 / 63%)";
-                buttonElement.style.boxShadow = "none";
-                event.target.classList.remove("active");
-            }
+    const checkBox = document.getElementById(id);
+    const buttonElement = checkBox; // or select the appropriate button element
+
+    checkBox.onclick = function(event) {
+        modConfigs[toggledId || id] = !modConfigs[toggledId || id];
+
+        if (modConfigs[toggledId || id]) {
+            checkBox.classList.add("active");
+        } else {
+            checkBox.classList.remove("active");
         }
-    }
-    return (id, toggledId);
+    };
 }
 
 // value:
@@ -1920,25 +1911,25 @@ chatlog.style = `
     background-color: rgb(0 2 54 / 53%);
     border-radius: 10px;
     backdrop-filter: blur(7px);
-    display: none;
+    display: flex;
+    flex-direction: column;
+    z-index: 999;
 `;
 
 function updatechathtml() {
     chatlog.innerHTML = `
     <style>
-        .chMainDiv{
+        #chatmain {
+            background-color: rgb(255 255 255 / 27%);
+            border-radius: 6px 6px 0px 0px;
+            text-align: center;
+            font-size: 20px;
+            color: #00ffd2;
+            height: 30px;
             font-family: "Ubuntu", sans-serif;
-            font-size: 12px;
-            max-height: 235px;
-            overflow-y: scroll;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
-        .chMainBox{
+
+        #chatbox {
             position: absolute;
             left: 5px;
             bottom: 10px;
@@ -1955,26 +1946,24 @@ function updatechathtml() {
             outline: none;
             padding: 0 5px;
         }
-        #menuChDisp {
+
+        #chatdisp {
             color: white;
             white-space: pre-wrap;
             word-wrap: break-word;
         }
     </style>
-    <div id="mChMain" class="chMainDiv">
-        <div id="menuChDisp"></div>
-    </div>
-    <input type="text" id="mChBox" class="chMainBox" placeholder="To chat click here or press 'Enter' key">
+    <div id="chatmain">CHAT LOG</div>
+    <div id="chatdisp"></div>
     `;
 }
 updatechathtml();
-let menuChats = getEl("mChMain");
-let menuChatBox = getEl("mChBox");
+let menuChats = getEl("chatmain");
 let menuCBFocus = false;
 let menuChCounts = 0;
 
 function addMenuChText(name, message, color, noTimer) {
-    let menuChDisp = getEl("menuChDisp");
+    let menuChDisp = getEl("chatdisp");
     color = color || "white";
     let time = new Date();
     let min = time.getMinutes();
@@ -1995,19 +1984,10 @@ function addMenuChText(name, message, color, noTimer) {
 }
 
 function resetMenuChText() {
-    let menuChDisp = getEl("menuChDisp");
+    let menuChDisp = getEl("chatdisp");
     menuChDisp.innerHTML = ``;
     menuChCounts = 0;
-    addMenuChText(null, "Chat Log", "white", 1);
 }
-
-menuChatBox.addEventListener("focus", function() {
-    menuCBFocus = true;
-});
-
-menuChatBox.addEventListener("blur", function() {
-    menuCBFocus = false;
-});
 resetMenuChText();
 
 // open menus
@@ -5886,7 +5866,7 @@ function biomeGear() {
         buyEquip(31, 0);
     } else {
         if (isMoveDir == undefined) {
-            buyEquip(22 || 6, 0);
+            buyEquip(22, 0);
         } else {
             if (player.y2 <= config.snowBiomeTop) {
                 buyEquip(15, 0);
@@ -5897,9 +5877,6 @@ function biomeGear() {
     }
 }
 
-function woah(mover) {
-    buyEquip(mover && player.moveDir == undefined ? 0 : 20, 1);
-}
 let advHeal = [];
 
 class Traps {
@@ -6066,31 +6043,26 @@ class Traps {
         this.autoPlace = function() {
             if (modConfigs.autoPlace && game.tick % (Math.max(1, parseInt(getEl("autoPlaceTick").value)) || 1) === 0) {
                 try {
-                    const trap1 = gameObjects.filter((e) => e.trap && e.active).sort((a, b) => UTILS.getDist(a, near, 0, 2) - UTILS.getDist(b, near, 0, 2)).find((trap) => {
-                        const trapDist = Math.hypot(trap.y - near.y2, trap.x - near.x2);
-                        return (trap !== player && (player.sid === trap.owner.sid || findAllianceBySid(trap.owner.sid)) && trapDist <= 50);
-                    });
                     if (this.inTrap) {
                         let antiTrapAngles = Math.PI / Math.floor(Math.random() * (20 - 10 + 1)) + 10;
                         this.testCanPlace(4, -(Math.PI / 2), (Math.PI / 2), antiTrapAngles, near.aim2);
                     } else {
-                        if (near.dist3 <= 450) {
-                            if (near.dist3 <= 200) {
-                                this.testCanPlace(4, 0, Math.PI * 2, Math.PI / 24, near.aim2, 0, {
-                                    inTrap: isNearTrap
-                                });
+                        if (near.dist2 <= 600 && near.scale) {
+                            checkPlace(2, Math.atan2(player.y - trap.y, player.x - trap.x) + Math.PI);
+                            if (near.dist2 <= 250) {
+                                for (let i = 0; i < Math.PI * 2; i += Math.PI / 1.5) {
+                                    checkPlace(2, near.aim2 + i);
+                                }
                             } else if (player.items[4] === 15) {
-                                this.testCanPlace(4, 0, Math.PI * 2, Math.PI / 24, near.aim2);
+                                checkPlace(4, (Math.PI * 2, Math.PI / 24, near.aim2));
+                            }
+                        } else if (player.items[4] == 15) {
+                            if (near.dist2 <= 200) {
+                                for (let i = 0; i < Math.PI * 2; i += Math.PI / 2) {
+                                    checkPlace(4, randomDir + i);
+                                }
                             }
                         }
-                        const closestTrap = gameObjects.filter(e => e.trap && e.active).sort((a, b) => UTILS.getDist(a, near, 0, 2) - UTILS.getDist(b, near, 0, 2)).find(trap => {
-                            const trapDist = Math.hypot(trap.y - near.y2, trap.x - near.x2);
-                            return (
-                                trap !== player &&
-                                (player.sid === trap.owner.sid || findAllianceBySid(trap.owner.sid)) &&
-                                trapDist <= 50
-                            );
-                        });
                     }
                 } catch (e) {
                     console.log(e);
@@ -10679,6 +10651,18 @@ function getItemSprite(obj, asIcon) {
             tmpContext.rotate(Math.PI / 4);
             tmpContext.fillStyle = "#dda3ff";
             renderCircle(0, 0, obj.scale * 0.5, tmpContext, true);
+        } else if (obj.name == "spawn pad") {
+            tmpContext.globalAlpha = 0.5;
+            tmpContext.fillStyle = "#fffef7";
+            renderRect(0, 0, obj.scale * 2, obj.scale * 2, tmpContext);
+            tmpContext.fill();
+            tmpContext.stroke();
+            tmpContext.fillStyle = "#0060bf";
+            renderCircle(0, 0, obj.scale * 0.6, tmpContext);
+            tmpContext.fill();
+            tmpContext.stroke();
+            tmpContext.fillStyle = "#00f7ff";
+            renderTriangle(0, -obj.scale * 0.33, obj.scale * 1, tmpContext);
         }
         tmpSprite = tmpCanvas;
         if (!asIcon) itemSprites[obj.id] = tmpSprite;
@@ -11656,16 +11640,13 @@ function updateGameInfo() {
     let timer = performance.now();
     let diff = timer - fpsTimer.last;
     if (diff >= 1000) {
-
         fpsTimer.ltime = fpsTimer.time * (1000 / diff);
-
         fpsTimer.last = timer;
         fpsTimer.time = 0;
     }
     fpsTimer.time++;
-
-    getEl("secXP").innerHTML = Math.round(priXP) + "/" + maxPriXP;
-    getEl("priXP").innerHTML = Math.round(secXP) + "/" + maxSecXP;
+    getEl("priXP").innerHTML = priXP + "/" + maxPriXP;
+    getEl("secXP").innerHTML = secXP + "/" + maxSecXP;
     getEl("gameFrames").innerHTML = Math.round(fpsTimer.ltime);
     getEl("gamePing").innerHTML = window.pingTime;
     getEl("gamePackets").innerHTML = secPacket;
